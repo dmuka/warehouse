@@ -1,0 +1,7 @@
+= Warehouse
+dmuka; Dmitry Belousov
+:toc:
+
+image:https://img.shields.io/github/commit-activity/t/dmuka/warehouse[GitHub commits, alt="Commits Badge"]
+image:https://img.shields.io/github/commit-activity/m/dmuka/warehouse[GitHub commits, alt="Commits Badge"]
+image:https://img.shields.io/github/last-commit/dmuka/warehouse[GitHub last commit, alt="Last Commit Badge"]
