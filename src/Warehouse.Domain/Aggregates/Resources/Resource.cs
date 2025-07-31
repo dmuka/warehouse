@@ -1,4 +1,5 @@
-﻿using Warehouse.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Resources.Specifications;
 
@@ -6,6 +7,8 @@ namespace Warehouse.Domain.Aggregates.Resources;
 
 public class Resource : AggregateRoot
 {
+    [Key] 
+    public new ResourceId Id { get; protected set; } = null!;
     public ResourceName ResourceName { get; private set; } = null!;
     public bool IsActive { get; private set; }
 
@@ -27,7 +30,7 @@ public class Resource : AggregateRoot
         bool isActive = true,
         Guid? resourceId = null)
     {
-        var validationResults = ValidateResourceDetails(resourceName);
+        var validationResults = ValidateResourceDetails(resourceId, resourceName);
         if (validationResults.Length != 0)
             return Result<Resource>.ValidationFailure(ValidationError.FromResults(validationResults));
         
@@ -51,13 +54,19 @@ public class Resource : AggregateRoot
     public void Activate() => IsActive = true;
     public void Deactivate() => IsActive = false;
 
-    private static Result[] ValidateResourceDetails(string resourceName)
+    private static Result[] ValidateResourceDetails(Guid? resourceId, string resourceName)
     {
         var validationResults = new []
         {
             new ResourceNameMustBeValid(resourceName).IsSatisfied()
         };
-            
+        if (resourceId.HasValue)
+        {
+            validationResults = validationResults
+                .Append(new ResourceIdMustBeValid(resourceId.Value).IsSatisfied())
+                .ToArray();
+        }
+
         var results = validationResults.Where(result => result.IsFailure);
 
         return results.ToArray();

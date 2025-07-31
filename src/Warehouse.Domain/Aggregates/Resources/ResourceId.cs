@@ -1,17 +1,17 @@
 using Warehouse.Core;
+using Warehouse.Core.Results;
 
-namespace Warehouse.Domain.Aggregates.Resources;
-
-public class ResourceId : TypedId
+namespace Warehouse.Domain.Aggregates.Resources
 {
-    protected ResourceId() { }
-
-    public ResourceId(Guid value) : base(value)
+    public class ResourceId : TypedId
     {
-    }
+        protected ResourceId() { }
 
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Value;
+        public ResourceId(Guid value) : base(value) { }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Value;
+        }
     }
 }

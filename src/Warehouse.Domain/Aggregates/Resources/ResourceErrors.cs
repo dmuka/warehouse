@@ -14,6 +14,10 @@ public static class ResourceErrors
         Codes.EmptyResourceName,
         "The provided resource name value is empty.");
 
+    public static readonly Error EmptyResourceId = Error.Problem(
+        Codes.EmptyResourceId,
+        "The provided resource id value is empty.");
+
     public static readonly Error TooShortResourceName = Error.Problem(
         Codes.TooShortResourceName,
         $"The provided resource name value is too short (less than {ResourceConstants.ResourceNameMinLength}).");
@@ -21,4 +25,12 @@ public static class ResourceErrors
     public static readonly Error TooLargeResourceName = Error.Problem(
         Codes.TooLargeResourceName,
         $"The provided resource name value is too large (larger than {ResourceConstants.ResourceNameMaxLength}).");
+
+    public static readonly Error ResourceWithThisNameExist = Error.Problem(
+        Codes.ResourceWithThisNameExist,
+        "Resource with this name already exist.");
+    
+    public static readonly Error ResourceAlreadyArchived = Error.Problem(
+        Codes.ResourceAlreadyArchived,
+        "Resource already archived.");
 }
