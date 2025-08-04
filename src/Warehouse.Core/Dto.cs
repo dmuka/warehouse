@@ -1,9 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace Warehouse.Core;
 
 public abstract class Dto
 {
+    [Key] 
     public Guid? Id { get; set; }
     public abstract AggregateRoot ToEntity();
     public abstract Dto ToDto(AggregateRoot entity);

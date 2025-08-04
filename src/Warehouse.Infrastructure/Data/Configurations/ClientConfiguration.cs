@@ -4,11 +4,11 @@ using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Infrastructure.Data.Configurations;
 
-internal class ResourceConfiguration : IEntityTypeConfiguration<ResourceDto>
+internal class ClientConfiguration : IEntityTypeConfiguration<ClientDto>
 {
-    public void Configure(EntityTypeBuilder<ResourceDto> builder)
+    public void Configure(EntityTypeBuilder<ClientDto> builder)
     {
-        builder.ToTable("Resources");
+        builder.ToTable("Clients");
         
         builder.HasKey(r => r.Id);
         
@@ -16,7 +16,7 @@ internal class ResourceConfiguration : IEntityTypeConfiguration<ResourceDto>
             .IsRequired()
             .HasDefaultValue(true);
             
-        builder.HasIndex(r => r.ResourceName)
+        builder.HasIndex(r => r.ClientName)
             .IsUnique()
             .HasFilter("IsActive = 1");
     }

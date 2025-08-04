@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Infrastructure.Data;
@@ -8,6 +7,8 @@ public class WarehouseDbContext(DbContextOptions<WarehouseDbContext> options) : 
 {
     public DbSet<ResourceDto> Resources { get; set; }
     public DbSet<UnitDto> Units { get; set; }
+    public DbSet<ClientDto> Clients { get; set; }
+    public DbSet<BalanceDto> Balances { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

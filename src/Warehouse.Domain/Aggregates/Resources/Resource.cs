@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Warehouse.Core;
+﻿using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Resources.Specifications;
 
 namespace Warehouse.Domain.Aggregates.Resources;
 
 public class Resource : AggregateRoot
-{
-    [Key] 
+{ 
     public new ResourceId Id { get; protected set; } = null!;
     public ResourceName ResourceName { get; private set; } = null!;
     public bool IsActive { get; private set; }

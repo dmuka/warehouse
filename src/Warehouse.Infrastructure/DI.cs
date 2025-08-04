@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Warehouse.Domain;
+using Warehouse.Domain.Aggregates.Balances;
+using Warehouse.Domain.Aggregates.Clients;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
 using Warehouse.Infrastructure.Data;
@@ -32,6 +34,15 @@ public static class DI
         
         services.AddScoped<IRepository<Unit>, Repository<Unit, UnitDto>>();        
         services.AddScoped<IUnitRepository, UnitRepository>();
+        
+        services.AddScoped<IRepository<Unit>, Repository<Unit, UnitDto>>();        
+        services.AddScoped<IUnitRepository, UnitRepository>();
+        
+        services.AddScoped<IRepository<Client>, Repository<Client, ClientDto>>();        
+        services.AddScoped<IClientRepository, ClientRepository>();
+        
+        services.AddScoped<IRepository<Balance>, Repository<Balance, BalanceDto>>();        
+        services.AddScoped<IBalanceRepository, BalanceRepository>();
 
         return services;
     }
