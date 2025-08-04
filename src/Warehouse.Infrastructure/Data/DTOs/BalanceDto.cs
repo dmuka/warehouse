@@ -1,7 +1,5 @@
 ﻿using Warehouse.Core;
 using Warehouse.Domain.Aggregates.Balances;
-using Warehouse.Domain.Aggregates.Resources;
-using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.DTOs;
 

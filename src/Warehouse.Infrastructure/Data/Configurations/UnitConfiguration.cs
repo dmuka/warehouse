@@ -1,22 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Warehouse.Infrastructure.Data.DTOs;
+using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Configurations;
 
-internal class UnitConfiguration : IEntityTypeConfiguration<UnitDto>
+internal class UnitConfiguration : IEntityTypeConfiguration<Unit>
 {
-    public void Configure(EntityTypeBuilder<UnitDto> builder)
+    public void Configure(EntityTypeBuilder<Unit> builder)
     {
         builder.ToTable("Units");
         
-        builder.HasKey(r => r.Id);
+        builder.HasKey(unit => unit.Id);
+        builder.Property(unit => unit.Id)
+            .HasConversion(id => id.Value, value => new UnitId(value));
         
-        builder.Property(r => r.IsActive)
+        builder.Property(unit => unit.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
+        
+        builder.Property(unit => unit.UnitName)
+            .HasConversion(name => name.Value, value => UnitName.Create(value).Value);
             
-        builder.HasIndex(r => r.UnitName)
+        builder.HasIndex(unit => unit.UnitName)
             .IsUnique()
             .HasFilter("IsActive = 1");
     }

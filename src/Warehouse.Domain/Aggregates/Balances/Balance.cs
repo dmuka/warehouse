@@ -15,9 +15,6 @@ public class Balance : AggregateRoot
     public UnitId UnitId { get; private set; } = null!;
     public decimal Quantity { get; private set; }
     public DateTime LastUpdated { get; private set; }
-    
-    public Resource Resource { get; private set; } = null!;
-    public Unit Unit { get; private set; } = null!;
 
     protected Balance() { }
 

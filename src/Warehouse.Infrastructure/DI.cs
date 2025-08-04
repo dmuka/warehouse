@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Balances;
 using Warehouse.Domain.Aggregates.Clients;
+using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
 using Warehouse.Infrastructure.Data;
@@ -29,20 +30,23 @@ public static class DI
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
-        services.AddScoped<IRepository<Resource>, Repository<Resource, ResourceDto>>();        
+        services.AddScoped<IRepository<Resource>, Repository<Resource>>();        
         services.AddScoped<IResourceRepository, ResourceRepository>();
         
-        services.AddScoped<IRepository<Unit>, Repository<Unit, UnitDto>>();        
+        services.AddScoped<IRepository<Unit>, Repository<Unit>>();        
         services.AddScoped<IUnitRepository, UnitRepository>();
         
-        services.AddScoped<IRepository<Unit>, Repository<Unit, UnitDto>>();        
+        services.AddScoped<IRepository<Unit>, Repository<Unit>>();        
         services.AddScoped<IUnitRepository, UnitRepository>();
         
-        services.AddScoped<IRepository<Client>, Repository<Client, ClientDto>>();        
+        services.AddScoped<IRepository<Client>, Repository<Client>>();        
         services.AddScoped<IClientRepository, ClientRepository>();
         
-        services.AddScoped<IRepository<Balance>, Repository<Balance, BalanceDto>>();        
+        services.AddScoped<IRepository<Balance>, Repository<Balance>>();        
         services.AddScoped<IBalanceRepository, BalanceRepository>();
+        
+        services.AddScoped<IRepository<Receipt>, Repository<Receipt>>();        
+        services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
         return services;
     }

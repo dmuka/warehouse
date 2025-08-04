@@ -12,6 +12,17 @@ namespace Warehouse.Presentation.Controllers;
 [Produces("application/json")]
 public class ResourcesController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType(typeof(IList<ResourceDto>), StatusCodes.Status200OK)]
+    public async Task<IResult> GetResources()
+    {
+        var query = new GetResourcesQuery();
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
+    
     [HttpPost]
     [ProducesResponseType(typeof(ResourceDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

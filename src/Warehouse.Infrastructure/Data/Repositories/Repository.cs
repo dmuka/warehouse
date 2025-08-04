@@ -5,9 +5,8 @@ using Warehouse.Domain;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class Repository<TEntity, TEntityDto>(WarehouseDbContext context) : IRepository<TEntity>
+public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEntity>
     where TEntity : AggregateRoot
-    where TEntityDto : Dto, new()
 {
     public IQueryable<TEntity> GetQueryable()
     {
@@ -21,36 +20,34 @@ public class Repository<TEntity, TEntityDto>(WarehouseDbContext context) : IRepo
 
     public async Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var dtos = await context.Set<TEntityDto>()
+        var entities = await context.Set<TEntity>()
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-        var entities = dtos.Select(dto => (TEntity)dto.ToEntity());
         
-        return entities.ToList();
+        return entities;
     }
 
     public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var dto = await context.Set<TEntityDto>()
+        var entity = await context.Set<TEntity>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(dto => dto.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         
-        return dto is not null ? (TEntity)dto.ToEntity() : null;
+        return entity;
     }
 
     public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)
     {
-        var conditionDto = Dto.EntityToDtoMapper<TEntity, TEntityDto>.ConvertCondition(condition);
-        var dto = await context.Set<TEntityDto>()
+        var entity = await context.Set<TEntity>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(conditionDto, cancellationToken);
+            .FirstOrDefaultAsync(condition, cancellationToken);
         
-        return dto is not null ? (TEntity)dto.ToEntity() : null;;
+        return entity;
     }
 
     public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default) 
     {
-        return await context.Set<TEntityDto>().FindAsync([id], cancellationToken) is not null;
+        return await context.Set<TEntity>().FindAsync([id], cancellationToken) is not null;
     }
 
     public async Task<IList<TEntity>> GetFromRawSqlAsync(
@@ -58,50 +55,40 @@ public class Repository<TEntity, TEntityDto>(WarehouseDbContext context) : IRepo
         List<object>? parameters, 
         CancellationToken cancellationToken = default)
     {
-        var dtos = await context.Set<TEntityDto>()
+        var entities = await context.Set<TEntity>()
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-        var entities = dtos.Select(dto => (TEntity)dto.ToEntity());
         
-        return entities.ToList();
+        return entities;
     }
 
     public void Add(TEntity entity)
     {
-        var dto = new TEntityDto();
-        dto.ToDto(entity);
-        
-        context.Set<TEntityDto>().Add(dto);
+        context.Set<TEntity>().Add(entity);
     }
 
     public void Update(TEntity entity)
     {
-        var dto = new TEntityDto();
-        dto.ToDto(entity);
-        
-        context.Set<TEntityDto>().Update(dto);
+        context.Set<TEntity>().Update(entity);
     }
 
     public async Task Delete(Guid entityId)
     {
-        var entity = await context.Set<TEntityDto>().FindAsync(entityId);
+        var entity = await context.Set<TEntity>().FindAsync(entityId);
         if (entity is not null)
         {
-            context.Set<TEntityDto>().Remove(entity);
+            context.Set<TEntity>().Remove(entity);
         }
     }
 
     public async Task<IList<TEntity>> GetEntitiesByCondition(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)
     {
-        var conditionDto = Dto.EntityToDtoMapper<TEntity, TEntityDto>.ConvertCondition(condition);
-        
-        var dtos = await context.Set<TEntityDto>()
+        var entities = await context.Set<TEntity>()
             .AsNoTracking()
-            .Where(conditionDto)
+            .Where(condition)
             .ToListAsync(cancellationToken);
-        var entities = dtos.Select(dto => (TEntity)dto.ToEntity());
         
-        return entities.ToList();
+        return entities;
     }
 
     public void ClearChangeTracker()
