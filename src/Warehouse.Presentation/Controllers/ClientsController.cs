@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Warehouse.Application.UseCases.Units;
+using Warehouse.Application.UseCases.Clients;
 using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -10,14 +10,14 @@ namespace Warehouse.Presentation.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class UnitsController(IMediator mediator) : ControllerBase
+public class ClientsController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    [ProducesResponseType(typeof(UnitDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ClientDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] UnitDto resourceDto)
+    public async Task<IResult> Create([FromBody] ClientDto resourceDto)
     {
-        var command = new CreateUnit(resourceDto);
+        var command = new CreateClientCommand(resourceDto);
         
         var result = await mediator.Send(command);
 
@@ -25,11 +25,11 @@ public class UnitsController(IMediator mediator) : ControllerBase
     }
     
     [HttpGet("{id:Guid}")]
-    [ProducesResponseType(typeof(UnitDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ClientDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> GetById(Guid id)
     {
-        var query = new GetUnitByIdQuery(id);
+        var query = new GetClientByIdQuery(id);
         
         var result = await mediator.Send(query);
 
@@ -41,7 +41,7 @@ public class UnitsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> Archive(Guid id)
     {
-        var command = new ArchiveUnitCommand(id);
+        var command = new ArchiveClientCommand(id);
         
         var result = await mediator.Send(command);
 

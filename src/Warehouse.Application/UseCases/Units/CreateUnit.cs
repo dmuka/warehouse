@@ -8,14 +8,14 @@ using Unit = Warehouse.Domain.Aggregates.Units.Unit;
 
 namespace Warehouse.Application.UseCases.Units;
 
-public record CreateUnitCommand(UnitDto Dto) : IRequest<Result<UnitId>>;
+public record CreateUnit(UnitDto Dto) : IRequest<Result<UnitId>>;
 
 public sealed class CreateUnitCommandHandler(
     IUnitRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateUnitCommand, Result<UnitId>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateUnit, Result<UnitId>>
 {
     public async Task<Result<UnitId>> Handle(
-        CreateUnitCommand request,
+        CreateUnit request,
         CancellationToken cancellationToken)
     {
         var specificationResult = await new UnitNameMustBeUnique(request.Dto.UnitName, repository)
