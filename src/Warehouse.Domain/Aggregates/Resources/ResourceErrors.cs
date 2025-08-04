@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Warehouse.Core.Results;
+﻿using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Resources.Constants;
 
 namespace Warehouse.Domain.Aggregates.Resources;
@@ -23,8 +22,8 @@ public static class ResourceErrors
         $"The provided resource name value is too short (less than {ResourceConstants.ResourceNameMinLength}).");
 
     public static readonly Error TooLargeResourceName = Error.Problem(
-        Codes.TooLargeResourceName,
-        $"The provided resource name value is too large (larger than {ResourceConstants.ResourceNameMaxLength}).");
+        Codes.TooLongResourceName,
+        $"The provided resource name value is too long (longer than {ResourceConstants.ResourceNameMaxLength}).");
 
     public static readonly Error ResourceWithThisNameExist = Error.Problem(
         Codes.ResourceWithThisNameExist,
