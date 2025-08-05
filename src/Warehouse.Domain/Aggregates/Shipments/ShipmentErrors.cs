@@ -36,4 +36,8 @@ public static class ShipmentErrors
     public static Error ShipmentItemAlreadyExist(Guid resourceId, Guid unitId) => Error.Problem(
         Codes.ShipmentItemAlreadyExist,
         $"Shipment already contains such item (resource id: {resourceId}, unit id: {unitId})");
+
+    public static Error ShipmentAlreadyExist(string shipmentNumber) => Error.Problem(
+        Codes.ShipmentAlreadyExist,
+        $"Shipment already exist (shipment number: {shipmentNumber})");
 }

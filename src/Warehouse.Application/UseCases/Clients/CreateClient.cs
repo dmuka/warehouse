@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Clients.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
@@ -16,12 +17,15 @@ public sealed class CreateClientCommandHandler(
         CreateClientCommand request,
         CancellationToken cancellationToken)
     {
+        var specificationResult = await new ClientNameMustBeUnique(request.Dto.ClientName, repository)
+            .IsSatisfiedAsync(cancellationToken);
+        if (specificationResult.IsFailure) return Result.Failure<ClientId>(specificationResult.Error);
+        
         var clientResult = Client.Create(
             request.Dto.ClientName,
             request.Dto.ClientAddress,
             request.Dto.IsActive,
             request.Dto.Id);
-
         if (clientResult.IsFailure) return Result.Failure<ClientId>(clientResult.Error);
 
         repository.Add(clientResult.Value);

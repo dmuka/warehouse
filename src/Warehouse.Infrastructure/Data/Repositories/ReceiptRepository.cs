@@ -6,7 +6,17 @@ namespace Warehouse.Infrastructure.Data.Repositories;
 public class ReceiptRepository(WarehouseDbContext context) : Repository<Receipt>(context), IReceiptRepository 
 {
     private readonly WarehouseDbContext _context = context;
+    
+    public async Task<bool> IsNumberUniqueAsync(string receiptNumber, Guid? excludedId = null)
+    {
+        var query = _context.Receipts
+            .Where(receipt => receipt.Number == receiptNumber);
 
+        if (excludedId.HasValue) query = query.Where(receipt => receipt.Id != excludedId.Value);
+
+        return !await query.AnyAsync();
+    }
+    
     public async Task<Receipt?> GetByIdAsync(
         ReceiptId id,
         bool includeItems = false,

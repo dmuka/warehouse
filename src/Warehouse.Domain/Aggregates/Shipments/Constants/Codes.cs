@@ -10,5 +10,6 @@ public static class Codes
     public const string InsufficientStock = "InsufficientStock";
     public const string InvalidStatusTransition = "InvalidStatusTransition";
     public const string AlreadyFinalized = "AlreadyFinalized";
+    public const string ShipmentAlreadyExist = "ShipmentAlreadyExist";
     public const string ClientAlreadyArchived = "ClientAlreadyArchived";
 }

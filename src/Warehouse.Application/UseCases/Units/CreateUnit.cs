@@ -20,14 +20,10 @@ public sealed class CreateUnitCommandHandler(
     {
         var specificationResult = await new UnitNameMustBeUnique(request.Dto.UnitName, repository)
             .IsSatisfiedAsync(cancellationToken);
-        
-        if (specificationResult.IsFailure)
-            return Result.Failure<UnitId>(specificationResult.Error);
+        if (specificationResult.IsFailure) return Result.Failure<UnitId>(specificationResult.Error);
 
         var unitResult = Unit.Create(request.Dto.UnitName, request.Dto.IsActive, request.Dto.Id);
-        
-        if (unitResult.IsFailure)
-            return Result.Failure<UnitId>(unitResult.Error);
+        if (unitResult.IsFailure) return Result.Failure<UnitId>(unitResult.Error);
 
         repository.Add(unitResult.Value);
         await unitOfWork.CommitAsync(cancellationToken);

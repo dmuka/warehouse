@@ -6,6 +6,16 @@ namespace Warehouse.Infrastructure.Data.Repositories;
 public class ShipmentRepository(WarehouseDbContext context) : Repository<Shipment>(context), IShipmentRepository
 {
     private readonly WarehouseDbContext _context = context;
+    
+    public async Task<bool> IsNumberUniqueAsync(string shipmentNumber, Guid? excludedId = null)
+    {
+        var query = _context.Shipments
+            .Where(shipment => shipment.Number == shipmentNumber);
+
+        if (excludedId.HasValue) query = query.Where(shipment => shipment.Id != excludedId.Value);
+
+        return !await query.AnyAsync();
+    }
 
     public async Task<Shipment?> GetByIdAsync(
         ShipmentId id,

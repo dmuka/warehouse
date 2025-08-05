@@ -20,4 +20,8 @@ public static class ReceiptErrors
     public static Error ReceiptItemAlreadyExist(Guid resourceId, Guid unitId) => Error.Problem(
         Codes.ReceiptItemAlreadyExist,
         $"Receipt already contains such item (resource id: {resourceId}, unit id: {unitId})");
+
+    public static Error ReceiptAlreadyExist(string receiptNumber) => Error.Problem(
+        Codes.ReceiptAlreadyExist,
+        $"Receipt already exist (receipt number: {receiptNumber})");
 }
