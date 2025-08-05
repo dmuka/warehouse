@@ -29,6 +29,8 @@ else
     app.UseHsts();
 }
 
+app.UseCors("AllowWarehouseClientApp");
+
 app.UseHttpsRedirection();
 
 app.UseRouting();

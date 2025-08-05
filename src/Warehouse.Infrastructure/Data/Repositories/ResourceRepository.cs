@@ -9,8 +9,9 @@ public class ResourceRepository(WarehouseDbContext context) : Repository<Resourc
 
     public async Task<bool> IsNameUniqueAsync(string resourceName, Guid? excludedId = null)
     {
+        var name = ResourceName.Create(resourceName).Value;
         var query = _context.Resources
-            .Where(resource => resource.ResourceName.Value == resourceName && resource.IsActive);
+            .Where(resource => resource.ResourceName == name && resource.IsActive);
 
         if (excludedId.HasValue) query = query.Where(resource => resource.Id != excludedId.Value);
 
