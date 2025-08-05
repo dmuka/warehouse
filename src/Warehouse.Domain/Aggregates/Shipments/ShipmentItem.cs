@@ -4,43 +4,43 @@ using Warehouse.Domain.Aggregates.Balances.Specifications;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
 
-namespace Warehouse.Domain.Aggregates.Receipts;
+namespace Warehouse.Domain.Aggregates.Shipments;
 
-public class ReceiptItem : Entity
+public class ShipmentItem : Entity
 {
-    public ReceiptId ReceiptId { get; private set; } = null!;
+    public ShipmentId ShipmentId { get; private set; } = null!;
     public ResourceId ResourceId { get; private set; } = null!;
     public UnitId UnitId { get; private set; } = null!;
     public decimal Quantity { get; private set; }
 
-    protected ReceiptItem() { }
+    protected ShipmentItem() { }
 
-    private ReceiptItem(
-        ReceiptId receiptId,
+    private ShipmentItem(
+        ShipmentId shipmentId,
         ResourceId resourceId,
         UnitId unitId,
         decimal quantity)
     {
-        ReceiptId = receiptId;
+        ShipmentId = shipmentId;
         ResourceId = resourceId;
         UnitId = unitId;
         Quantity = quantity;
     }
 
-    public static Result<ReceiptItem> Create(
-        Guid receiptId,
-        Guid resourceId,
-        Guid unitId,
+    public static Result<ShipmentItem> Create(
+        ShipmentId shipmentId,
+        ResourceId resourceId,
+        UnitId unitId,
         decimal quantity)
     {
         var validationResults = ValidateItemDetails(quantity);
         if (validationResults.Length != 0)
-            return Result<ReceiptItem>.ValidationFailure(ValidationError.FromResults(validationResults));
+            return Result<ShipmentItem>.ValidationFailure(ValidationError.FromResults(validationResults));
 
-        return new ReceiptItem(
-            new ReceiptId(receiptId),
-            new ResourceId(resourceId),
-            new UnitId(unitId),
+        return new ShipmentItem(
+            shipmentId,
+            resourceId,
+            unitId,
             quantity);
     }
 

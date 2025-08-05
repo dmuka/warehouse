@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Warehouse.Application.UseCases.Receipts;
+using Warehouse.Application.UseCases.Shipments;
 using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -10,13 +10,13 @@ namespace Warehouse.Presentation.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class ReceiptsController(IMediator mediator) : ControllerBase
+public class ShipmentsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<ReceiptDto>), StatusCodes.Status200OK)]
-    public async Task<IResult> GetReceipts()
+    [ProducesResponseType(typeof(IList<ShipmentDto>), StatusCodes.Status200OK)]
+    public async Task<IResult> GetShipments()
     {
-        var query = new GetReceiptsQuery();
+        var query = new GetShipmentsQuery();
         
         var result = await mediator.Send(query);
 
@@ -24,11 +24,11 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(ReceiptDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ShipmentDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ReceiptDto dto)
+    public async Task<IResult> Create([FromBody] ShipmentDto dto)
     {
-        var command = new CreateReceiptCommand(dto.ReceiptNumber, dto.ReceiptDate);
+        var command = new CreateShipmentCommand(dto.ShipmentNumber, dto.ShipmentDate, dto.ClientId);
         
         var result = await mediator.Send(command);
 

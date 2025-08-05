@@ -6,6 +6,7 @@ using Warehouse.Domain.Aggregates.Balances;
 using Warehouse.Domain.Aggregates.Clients;
 using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Domain.Aggregates.Resources;
+using Warehouse.Domain.Aggregates.Shipments;
 using Warehouse.Domain.Aggregates.Units;
 using Warehouse.Infrastructure.Data;
 using Warehouse.Infrastructure.Data.DTOs;
@@ -47,6 +48,9 @@ public static class DI
         
         services.AddScoped<IRepository<Receipt>, Repository<Receipt>>();        
         services.AddScoped<IReceiptRepository, ReceiptRepository>();
+        
+        services.AddScoped<IRepository<Shipment>, Repository<Shipment>>();        
+        services.AddScoped<IShipmentRepository, ShipmentRepository>();
 
         return services;
     }

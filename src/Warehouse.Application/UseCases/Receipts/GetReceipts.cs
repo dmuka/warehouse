@@ -7,13 +7,13 @@ namespace Warehouse.Application.UseCases.Receipts;
 public record GetReceiptsQuery : IRequest<Result<IList<Receipt>>>;
 
 public sealed class GetBalancesQueryHandler(
-    IReceiptRepository clientRepository) : IRequestHandler<GetReceiptsQuery, Result<IList<Receipt>>>
+    IReceiptRepository receiptRepository) : IRequestHandler<GetReceiptsQuery, Result<IList<Receipt>>>
 {
     public async Task<Result<IList<Receipt>>> Handle(
         GetReceiptsQuery request,
         CancellationToken cancellationToken)
     {
-        var receipts = await clientRepository.GetListAsync(cancellationToken);
+        var receipts = await receiptRepository.GetListAsync(cancellationToken);
 
         return Result.Success(receipts);
     }

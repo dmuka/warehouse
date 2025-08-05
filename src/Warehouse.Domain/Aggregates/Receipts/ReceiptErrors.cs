@@ -13,6 +13,10 @@ public static class ReceiptErrors
         Codes.EmptyReceiptId,
         "The provided receipt id value is empty.");
 
+    public static readonly Error EmptyReceiptNumber = Error.Problem(
+        Codes.EmptyReceiptNumber,
+        "The provided receipt number value is empty.");
+
     public static Error ReceiptItemAlreadyExist(Guid resourceId, Guid unitId) => Error.Problem(
         Codes.ReceiptItemAlreadyExist,
         $"Receipt already contains such item (resource id: {resourceId}, unit id: {unitId})");

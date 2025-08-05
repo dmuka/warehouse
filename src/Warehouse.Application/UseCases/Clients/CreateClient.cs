@@ -22,8 +22,7 @@ public sealed class CreateClientCommandHandler(
             request.Dto.IsActive,
             request.Dto.Id);
 
-        if (clientResult.IsFailure)
-            return Result.Failure<ClientId>(clientResult.Error);
+        if (clientResult.IsFailure) return Result.Failure<ClientId>(clientResult.Error);
 
         repository.Add(clientResult.Value);
         await unitOfWork.CommitAsync(cancellationToken);

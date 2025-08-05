@@ -43,9 +43,8 @@ public class Receipt : AggregateRoot
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)
     {
-        var itemResult = ReceiptItem.Create(resourceId, unitId, quantity);
-        if (itemResult.IsFailure)
-            return itemResult;
+        var itemResult = ReceiptItem.Create(Id, resourceId, unitId, quantity);
+        if (itemResult.IsFailure) return itemResult;
 
         if (_items.Any(i => i.ResourceId == resourceId && i.UnitId == unitId))
             return Result.Failure(ReceiptErrors.ReceiptItemAlreadyExist(resourceId, unitId));
