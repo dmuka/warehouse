@@ -14,7 +14,7 @@ public sealed class GetUnitByIdQueryHandler(IUnitRepository repository)
         GetUnitByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var unit = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var unit = await repository.GetByIdAsync(new UnitId(request.Id), cancellationToken);
         
         return unit is null 
             ? Result.Failure<Unit>(UnitErrors.NotFound(request.Id)) 

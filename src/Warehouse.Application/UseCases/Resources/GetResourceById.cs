@@ -10,10 +10,11 @@ public sealed class GetResourceByIdQueryHandler(IResourceRepository repository) 
 {
     public async Task<Result<Resource>> Handle(GetResourceByIdQuery request, CancellationToken cancellationToken)
     {
-        var isResourceExist = await repository.ExistsByIdAsync(request.Id, cancellationToken);
+        var id = new ResourceId(request.Id);
+        var isResourceExist = await repository.ExistsByIdAsync(id, cancellationToken);
         if (!isResourceExist) return Result.Failure<Resource>(ResourceErrors.NotFound(request.Id));
 
-        var resource = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var resource = await repository.GetByIdAsync(id, cancellationToken);
 
         return resource;
     }

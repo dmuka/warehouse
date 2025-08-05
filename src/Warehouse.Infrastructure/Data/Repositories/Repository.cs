@@ -27,7 +27,7 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
         return entities;
     }
 
-    public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetByIdAsync(TypedId id, CancellationToken cancellationToken = default)
     {
         var entity = await context.Set<TEntity>()
             .AsNoTracking()
@@ -45,7 +45,7 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
         return entity;
     }
 
-    public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default) 
+    public async Task<bool> ExistsByIdAsync(TypedId id, CancellationToken cancellationToken = default) 
     {
         return await context.Set<TEntity>().FindAsync([id], cancellationToken) is not null;
     }

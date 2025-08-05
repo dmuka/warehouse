@@ -9,7 +9,7 @@ public class UnitMustExist(Guid unitId, IUnitRepository repository) : IAsyncSpec
 {
     public async Task<Result> IsSatisfiedAsync(CancellationToken cancellationToken)
     {
-        if (!await repository.ExistsByIdAsync(unitId, cancellationToken))
+        if (!await repository.ExistsByIdAsync(new UnitId(unitId), cancellationToken))
             return Result.Failure<UnitId>(BalanceErrors.UnitNotFound(unitId));
         
         return Result.Success();

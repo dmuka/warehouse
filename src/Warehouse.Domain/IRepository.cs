@@ -48,7 +48,7 @@ namespace Warehouse.Domain
         /// <param name="id">The primary key value of the entity.</param>
         /// <param name="cancellationToken"> A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <returns>Returns <see cref="Task{TResult}"/>.</returns>
-        Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<TEntity?> GetByIdAsync(TypedId id, CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -75,7 +75,7 @@ namespace Warehouse.Domain
         /// <param name="id">The primary key value of the entity whose the existence will checked.</param>
         /// <param name="cancellationToken"> A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <returns>Returns <see cref="bool"/>.</returns>
-        Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsByIdAsync(TypedId id, CancellationToken cancellationToken = default);
 
         #endregion
 

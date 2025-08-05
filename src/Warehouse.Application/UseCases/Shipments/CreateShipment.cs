@@ -21,14 +21,14 @@ public sealed class CreateShipmentCommandHandler(
         CancellationToken cancellationToken)
     {
         var clientExists = await clientRepository.ExistsByIdAsync(
-            request.ClientId,
+            new ClientId(request.ClientId),
             cancellationToken);
         if (!clientExists) return Result.Failure<ShipmentId>(ShipmentErrors.NotFound(request.ClientId));
 
         var shipmentResult = Shipment.Create(
             request.Number,
             request.Date,
-            new ClientId(request.ClientId));
+            request.ClientId);
         if (shipmentResult.IsFailure) return Result.Failure<ShipmentId>(shipmentResult.Error);
 
         shipmentRepository.Add(shipmentResult.Value);

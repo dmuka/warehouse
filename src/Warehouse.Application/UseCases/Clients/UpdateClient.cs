@@ -16,7 +16,7 @@ public sealed class UpdateClientCommandHandler(
         UpdateClient request,
         CancellationToken cancellationToken)
     {
-        var client = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var client = await repository.GetByIdAsync(new ClientId(request.Id), cancellationToken);
         if (client is null)
             return Result.Failure(ClientErrors.NotFound(request.Id));
 

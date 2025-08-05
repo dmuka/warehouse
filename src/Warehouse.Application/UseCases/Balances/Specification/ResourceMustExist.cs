@@ -9,7 +9,7 @@ public class ResourceMustExist(Guid resourceId, IResourceRepository repository) 
 {
     public async Task<Result> IsSatisfiedAsync(CancellationToken cancellationToken)
     {
-        if (!await repository.ExistsByIdAsync(resourceId, cancellationToken))
+        if (!await repository.ExistsByIdAsync(new ResourceId(resourceId), cancellationToken))
             return Result.Failure<ResourceId>(BalanceErrors.ResourceNotFound(resourceId));
         
         return Result.Success();

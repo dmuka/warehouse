@@ -13,7 +13,7 @@ public sealed class ArchiveClientCommandHandler(
 {
     public async Task<Result> Handle(ArchiveClientCommand request, CancellationToken cancellationToken)
     {
-        var client = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var client = await repository.GetByIdAsync(new ClientId(request.Id), cancellationToken);
         if (client is null) return Result.Failure<Client>(ClientErrors.NotFound(request.Id));
         if (client.IsActive == false) return Result.Failure<Client>(ClientErrors.ClientAlreadyArchived);
         

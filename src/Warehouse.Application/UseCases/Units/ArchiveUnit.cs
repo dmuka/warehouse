@@ -14,7 +14,7 @@ public sealed class ArchiveUnitCommandHandler(
 {
     public async Task<Result> Handle(ArchiveUnitCommand request, CancellationToken cancellationToken)
     {
-        var resource = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var resource = await repository.GetByIdAsync(new UnitId(request.Id), cancellationToken);
         if (resource is null) return Result.Failure<Unit>(UnitErrors.NotFound(request.Id));
         if (resource.IsActive == false) return Result.Failure<Unit>(UnitErrors.UnitAlreadyArchived);
         

@@ -13,7 +13,7 @@ public sealed class ArchiveResourceCommandHandler(
 {
     public async Task<Result> Handle(ArchiveResourceCommand request, CancellationToken cancellationToken)
     {
-        var resource = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var resource = await repository.GetByIdAsync(new ResourceId(request.Id), cancellationToken);
         if (resource is null) return Result.Failure<Resource>(ResourceErrors.NotFound(request.Id));
         if (resource.IsActive == false) return Result.Failure<Resource>(ResourceErrors.ResourceAlreadyArchived);
         
