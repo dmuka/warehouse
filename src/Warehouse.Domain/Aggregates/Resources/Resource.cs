@@ -32,12 +32,12 @@ public class Resource : AggregateRoot
         if (validationResults.Length != 0)
             return Result<Resource>.ValidationFailure(ValidationError.FromResults(validationResults));
         
-        var category = new Resource(
+        var resource = new Resource(
             ResourceName.Create(resourceName).Value,
             isActive,
             resourceId is null ? new ResourceId(Guid.CreateVersion7()) : new ResourceId(resourceId.Value));
             
-        return Result.Success(category);
+        return Result.Success(resource);
     }
     
     public Result SetName(string resourceName)

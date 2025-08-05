@@ -58,4 +58,16 @@ public class ResourcesController(IMediator mediator) : ControllerBase
 
         return result.Match(Results.NoContent, CustomResults.Problem);
     }
+    
+    [HttpPut("update")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> Update([FromBody] ResourceDto resourceDto)
+    {
+        var command = new UpdateResourceCommand(resourceDto);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
 }
