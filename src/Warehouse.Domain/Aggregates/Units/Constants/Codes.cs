@@ -9,4 +9,5 @@ public static class Codes
     public const string EmptyUnitId = "EmptyUnitId";
     public const string UnitWithThisNameExist = "UnitWithThisNameExist";
     public const string UnitAlreadyArchived = "UnitAlreadyArchived";
+    public const string UnitAlreadyActive = "UnitAlreadyActive";
 }

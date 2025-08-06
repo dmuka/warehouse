@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
@@ -7,13 +8,15 @@ public class UnitRepository(WarehouseDbContext context) : Repository<Unit>(conte
 {
     private readonly WarehouseDbContext _context = context;
 
-    public async Task<bool> IsNameUniqueAsync(string resourceName, Guid? excludedId = null)
+    public async Task<Result> IsNameUniqueAsync(string unitName, Guid? excludedId = null)
     {
         var query = _context.Units
-            .Where(resource => resource.UnitName.Value == resourceName && resource.IsActive);
+            .Where(unit => unit.UnitName.Value == unitName && unit.IsActive);
 
-        if (excludedId.HasValue) query = query.Where(resource => resource.Id != excludedId.Value);
+        if (excludedId.HasValue) query = query.Where(unit => unit.Id != excludedId.Value);
 
-        return !await query.AnyAsync();
+        return await query.AnyAsync() == false
+            ? Result.Success() 
+            : Result.Failure(UnitErrors.UnitWithNameExists);
     }
 }

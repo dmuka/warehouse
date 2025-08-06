@@ -32,4 +32,8 @@ public static class ResourceErrors
     public static readonly Error ResourceAlreadyArchived = Error.Problem(
         Codes.ResourceAlreadyArchived,
         "Resource already archived.");
+    
+    public static readonly Error ResourceAlreadyActive = Error.Problem(
+        Codes.ResourceAlreadyActive,
+        "Resource already active.");
 }

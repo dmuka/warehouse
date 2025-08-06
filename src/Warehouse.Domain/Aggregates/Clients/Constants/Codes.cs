@@ -12,4 +12,5 @@ public static class Codes
     public const string EmptyClientId = "EmptyClientId";
     public const string ClientWithThisNameExist = "ClientWithThisNameExist";
     public const string ClientAlreadyArchived = "ClientAlreadyArchived";
+    public const string ClientAlreadyActive = "ClientAlreadyActive";
 }

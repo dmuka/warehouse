@@ -17,7 +17,8 @@ public sealed class CreateResourceCommandHandler(
         CreateResourceCommand request, 
         CancellationToken cancellationToken)
     {
-        var specificationResult = await new ResourceNameMustBeUnique(request.Dto.ResourceName, repository).IsSatisfiedAsync(cancellationToken);
+        var specificationResult = await new ResourceNameMustBeUnique(request.Dto.ResourceName, repository)
+            .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) return Result.Failure<ResourceId>(specificationResult.Error);
 
         var resourceCreationResult = Resource.Create(request.Dto.ResourceName, request.Dto.IsActive, request.Dto.Id);

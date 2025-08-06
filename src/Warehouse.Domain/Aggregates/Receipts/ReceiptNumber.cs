@@ -7,7 +7,7 @@ namespace Warehouse.Domain.Aggregates.Receipts;
 public class ReceiptNumber : ValueObject
 {
     protected ReceiptNumber() { }
-    public string Value { get; } = null!;
+    public string Value { get; private set; } = null!;
 
     private ReceiptNumber(string value) => Value = value;
 

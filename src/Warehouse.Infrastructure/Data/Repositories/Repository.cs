@@ -72,7 +72,7 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
         context.Set<TEntity>().Update(entity);
     }
 
-    public async Task Delete(Guid entityId)
+    public async Task Delete(TypedId entityId)
     {
         var entity = await context.Set<TEntity>().FindAsync(entityId);
         if (entity is not null)

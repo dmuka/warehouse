@@ -5,13 +5,14 @@ using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Application.UseCases.Units.Specifications;
 
-public class UnitNameMustBeUnique(string resourceName, IUnitRepository repository) : IAsyncSpecification
+public class UnitNameMustBeUnique(string unitName, IUnitRepository repository) : IAsyncSpecification
 {
     public async Task<Result> IsSatisfiedAsync(CancellationToken cancellationToken)
     {
-        if (!await repository.IsNameUniqueAsync(resourceName))
-            return Result.Failure<ResourceId>(ResourceErrors.ResourceWithThisNameExist);
+        var uniquenessResult = await repository.IsNameUniqueAsync(unitName);
         
-        return Result.Success();
+        return uniquenessResult.IsFailure ? 
+            Result.Failure(uniquenessResult.Error) 
+            : Result.Success();
     }
 }

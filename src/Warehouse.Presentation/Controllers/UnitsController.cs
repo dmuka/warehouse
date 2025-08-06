@@ -47,12 +47,36 @@ public class UnitsController(IMediator mediator) : ControllerBase
         return result.Match(Results.Ok, CustomResults.Problem);
     }
     
-    [HttpPatch("{id:Guid}/archive")]
+    [HttpDelete("delete/{id:Guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> RemoveById(Guid id)
+    {
+        var query = new RemoveUnitByIdQuery(id);
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
+    
+    [HttpPatch("archive/{id:Guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> Archive(Guid id)
     {
         var command = new ArchiveUnitCommand(id);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
+    
+    [HttpPatch("unarchive/{id:Guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> Unarchive(Guid id)
+    {
+        var command = new UnarchiveUnitCommand(id);
         
         var result = await mediator.Send(command);
 

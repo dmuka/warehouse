@@ -8,7 +8,7 @@ public class ResourceName : ValueObject
 {
     protected ResourceName() { }
 
-    public string Value { get; } = null!;
+    public string Value { get; private set; } = null!;
 
     private ResourceName(string value) => Value = value;
 

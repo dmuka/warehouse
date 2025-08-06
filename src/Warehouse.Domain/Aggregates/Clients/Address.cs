@@ -7,7 +7,7 @@ namespace Warehouse.Domain.Aggregates.Clients;
 public class Address : ValueObject
 {
     protected Address() { }
-    public string Value { get; } = null!;
+    public string Value { get; private set;} = null!;
 
     private Address(string value) => Value = value;
 

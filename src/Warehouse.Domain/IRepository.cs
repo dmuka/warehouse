@@ -133,7 +133,7 @@ namespace Warehouse.Domain
         /// </summary>
         /// <typeparam name="TEntity">The type of the <paramref name="entityId"/> to be marked as deleted.</typeparam>
         /// <param name="entityId">The primary key value of the entity.</param>
-        Task Delete(Guid entityId);
+        Task Delete(TypedId entityId);
         
         #endregion
 

@@ -1,4 +1,6 @@
-﻿namespace Warehouse.Domain.Aggregates.Units;
+﻿using Warehouse.Core.Results;
+
+namespace Warehouse.Domain.Aggregates.Units;
 
 /// <summary>
 /// Represents a repository interface for managing unit entities.
@@ -11,5 +13,5 @@ public interface IUnitRepository : IRepository<Unit>
     /// <param name="unitName">The name of the unit to check for uniqueness.</param>
     /// <param name="excludedId">An optional unit ID to exclude from the uniqueness check.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the name is unique.</returns>
-    Task<bool> IsNameUniqueAsync(string unitName, Guid? excludedId = null);
+    Task<Result> IsNameUniqueAsync(string unitName, Guid? excludedId = null);
 }

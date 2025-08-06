@@ -8,9 +8,10 @@ public class ResourceNameMustBeUnique(string resourceName, IResourceRepository r
 {
     public async Task<Result> IsSatisfiedAsync(CancellationToken cancellationToken)
     {
-        if (!await repository.IsNameUniqueAsync(resourceName))
-            return Result.Failure<ResourceId>(ResourceErrors.ResourceWithThisNameExist);
+        var uniquenessResult = await repository.IsNameUniqueAsync(resourceName);
         
-        return Result.Success();
+        return uniquenessResult.IsFailure 
+            ? Result.Failure(uniquenessResult.Error) 
+            : Result.Success();
     }
 }

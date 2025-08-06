@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Clients;
+using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
@@ -7,13 +9,15 @@ public class ClientRepository(WarehouseDbContext context) : Repository<Client>(c
 {
     private readonly WarehouseDbContext _context = context;
 
-    public async Task<bool> IsNameUniqueAsync(string resourceName, Guid? excludedId = null)
+    public async Task<Result> IsNameUniqueAsync(string clientName, Guid? excludedId = null)
     {
         var query = _context.Clients
-            .Where(resource => resource.ClientName.Value == resourceName && resource.IsActive);
+            .Where(client => client.ClientName.Value == clientName && client.IsActive);
 
-        if (excludedId.HasValue) query = query.Where(resource => resource.Id != excludedId.Value);
+        if (excludedId.HasValue) query = query.Where(unit => unit.Id != excludedId.Value);
 
-        return !await query.AnyAsync();
+        return await query.AnyAsync() == false
+            ? Result.Success() 
+            : Result.Failure(ClientErrors.ClientWithNameExists);
     }
 }

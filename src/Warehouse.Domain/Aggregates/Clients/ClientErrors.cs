@@ -44,4 +44,8 @@ public static class ClientErrors
     public static readonly Error ClientAlreadyArchived = Error.Problem(
         Codes.ClientAlreadyArchived,
         "Client is already archived");
+
+    public static readonly Error ClientAlreadyActive = Error.Problem(
+        Codes.ClientAlreadyActive,
+        "Client is already active");
 }

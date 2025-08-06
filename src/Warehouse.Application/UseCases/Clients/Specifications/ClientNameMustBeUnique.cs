@@ -8,9 +8,10 @@ public class ClientNameMustBeUnique(string clientName, IClientRepository reposit
 {
     public async Task<Result> IsSatisfiedAsync(CancellationToken cancellationToken)
     {
-        if (!await repository.IsNameUniqueAsync(clientName))
-            return Result.Failure<ClientId>(ClientErrors.ClientWithNameExists);
+        var uniquenessResult = await repository.IsNameUniqueAsync(clientName);
         
-        return Result.Success();
+        return uniquenessResult.IsFailure ? 
+            Result.Failure(uniquenessResult.Error) 
+            : Result.Success();
     }
 }

@@ -6,7 +6,7 @@ namespace Warehouse.Domain.Aggregates.Receipts;
 public class ReceiptDate : ValueObject
 {
     protected ReceiptDate() { }
-    public DateTime Value { get; }
+    public DateTime Value { get; private set; }
 
     private ReceiptDate(DateTime value) => Value = value;
 

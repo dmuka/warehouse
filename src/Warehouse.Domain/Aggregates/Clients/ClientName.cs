@@ -7,7 +7,7 @@ namespace Warehouse.Domain.Aggregates.Clients;
 public class ClientName : ValueObject
 {
     protected ClientName() { }
-    public string Value { get; } = null!;
+    public string Value { get; private set; } = null!;
 
     private ClientName(string value) => Value = value;
 

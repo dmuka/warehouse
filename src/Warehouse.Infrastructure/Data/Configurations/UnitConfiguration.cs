@@ -18,11 +18,6 @@ internal class UnitConfiguration : IEntityTypeConfiguration<Unit>
             .IsRequired()
             .HasDefaultValue(true);
         
-        builder.Property(unit => unit.UnitName)
-            .HasConversion(name => name.Value, value => UnitName.Create(value).Value);
-            
-        builder.HasIndex(unit => unit.UnitName)
-            .IsUnique()
-            .HasFilter("IsActive = 1");
+        builder.ComplexProperty(unit => unit.UnitName);
     }
 }

@@ -32,4 +32,8 @@ public static class UnitErrors
     public static readonly Error UnitAlreadyArchived = Error.Problem(
         Codes.UnitAlreadyArchived,
         "Unit already archived.");
+    
+    public static readonly Error UnitAlreadyActive = Error.Problem(
+        Codes.UnitAlreadyActive,
+        "Unit already active.");
 }

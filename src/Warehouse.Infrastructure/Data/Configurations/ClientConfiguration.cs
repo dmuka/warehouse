@@ -18,15 +18,8 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(client => client.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
-        
-        builder.Property(client => client.ClientName)
-            .HasConversion(name => name.Value, value => ClientName.Create(value).Value);
-        
-        builder.Property(client => client.ClientAddress)
-            .HasConversion(address => address.Value, value => Address.Create(value).Value);
-            
-        builder.HasIndex(client => client.ClientName)
-            .IsUnique()
-            .HasFilter("IsActive = 1");
+
+        builder.ComplexProperty(client => client.ClientName);
+        builder.ComplexProperty(client => client.ClientAddress);
     }
 }

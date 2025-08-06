@@ -7,7 +7,7 @@ namespace Warehouse.Domain.Aggregates.Units;
 public class UnitName : ValueObject
 {
     protected UnitName() { }
-    public string Value { get; } = null!;
+    public string Value { get; private set; } = null!;
 
     private UnitName(string value) => Value = value;
 

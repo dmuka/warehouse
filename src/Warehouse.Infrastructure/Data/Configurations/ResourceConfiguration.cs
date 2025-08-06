@@ -18,11 +18,6 @@ internal class ResourceConfiguration : IEntityTypeConfiguration<Resource>
             .IsRequired()
             .HasDefaultValue(true);
         
-        builder.Property(resource => resource.ResourceName)
-            .HasConversion(name => name.Value, value => ResourceName.Create(value).Value);
-        
-        builder.HasIndex(resource => resource.ResourceName)
-            .IsUnique()
-            .HasFilter("IsActive = 1");
+        builder.ComplexProperty(resource => resource.ResourceName);
     }
 }
