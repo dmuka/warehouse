@@ -19,7 +19,14 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
             .IsRequired()
             .HasDefaultValue(true);
 
-        builder.ComplexProperty(client => client.ClientName);
-        builder.ComplexProperty(client => client.ClientAddress);
+        
+        builder.ComplexProperty(resource => resource.ClientName, b =>
+        {
+            b.Property(name => name.Value).HasColumnName("ClientName");
+        });
+        builder.ComplexProperty(resource => resource.ClientAddress, b =>
+        {
+            b.Property(name => name.Value).HasColumnName("ClientAddress");
+        });
     }
 }

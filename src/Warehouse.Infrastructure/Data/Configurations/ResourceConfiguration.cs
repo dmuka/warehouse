@@ -18,6 +18,9 @@ internal class ResourceConfiguration : IEntityTypeConfiguration<Resource>
             .IsRequired()
             .HasDefaultValue(true);
         
-        builder.ComplexProperty(resource => resource.ResourceName);
+        builder.ComplexProperty(resource => resource.ResourceName, b =>
+        {
+            b.Property(name => name.Value).HasColumnName("ResourceName");
+        });
     }
 }

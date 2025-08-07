@@ -6,7 +6,7 @@ using Warehouse.Domain;
 namespace Warehouse.Infrastructure.Data.Repositories;
 
 public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEntity>
-    where TEntity : AggregateRoot
+    where TEntity : Entity
 {
     public IQueryable<TEntity> GetQueryable()
     {
@@ -49,17 +49,16 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
     {
         return await context.Set<TEntity>().FindAsync([id], cancellationToken) is not null;
     }
-
+    
     public async Task<IList<TEntity>> GetFromRawSqlAsync(
         string sql, 
         List<object>? parameters, 
         CancellationToken cancellationToken = default)
     {
-        var entities = await context.Set<TEntity>()
+        return await context.Database
+            .SqlQueryRaw<TEntity>(sql, parameters?.ToArray() ?? [])
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-        
-        return entities;
     }
 
     public void Add(TEntity entity)

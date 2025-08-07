@@ -5,7 +5,6 @@ using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Shipments;
 using Warehouse.Domain.Aggregates.Units;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Infrastructure.Data;
 

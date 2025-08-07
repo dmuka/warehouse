@@ -6,7 +6,7 @@ namespace Warehouse.Domain
     /// <summary>
     /// Contains base repository methods. If you register the multiple DbContexts, it will use the last one.
     /// </summary>
-    public interface IRepository<TEntity> where TEntity : AggregateRoot 
+    public interface IRepository<TEntity> where TEntity : Entity 
     {
         /// <summary>
         /// Gets <see cref="IQueryable{T}"/> of the entity.

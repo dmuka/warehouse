@@ -18,6 +18,9 @@ internal class UnitConfiguration : IEntityTypeConfiguration<Unit>
             .IsRequired()
             .HasDefaultValue(true);
         
-        builder.ComplexProperty(unit => unit.UnitName);
+        builder.ComplexProperty(resource => resource.UnitName, b =>
+        {
+            b.Property(name => name.Value).HasColumnName("UnitName");
+        });
     }
 }

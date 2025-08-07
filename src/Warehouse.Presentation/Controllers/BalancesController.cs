@@ -14,10 +14,22 @@ namespace Warehouse.Presentation.Controllers;
 public class BalancesController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<BalanceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<BalanceDto2>), StatusCodes.Status200OK)]
     public async Task<IResult> GetBalances()
     {
         var query = new GetBalancesQuery();
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
+
+    [HttpPost("filter")]
+    [ProducesResponseType(typeof(IList<BalanceDto2>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> GetFiltered([FromBody] BalanceFilterDto filter)
+    {
+        var query = new GetFilteredBalancesQuery(filter.ResourceNames, filter.UnitNames);
         
         var result = await mediator.Send(query);
 

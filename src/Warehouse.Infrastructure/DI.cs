@@ -51,6 +51,8 @@ public static class DI
         
         services.AddScoped<IRepository<Shipment>, Repository<Shipment>>();        
         services.AddScoped<IShipmentRepository, ShipmentRepository>();
+        
+        services.AddScoped<IRepository<BalanceDto2>, Repository<BalanceDto2>>(); 
 
         return services;
     }
