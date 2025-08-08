@@ -18,12 +18,12 @@ public class ShipmentDto : Dto
     public Guid ClientId { get; set; }
     public IList<ShipmentItem> Items { get; set; } = null!;
 
-    public override AggregateRoot ToEntity()
+    public override Entity ToEntity()
     {
         return Shipment.Create(ShipmentNumber, ShipmentDate, ClientId, Id).Value;
     }
 
-    public override Dto ToDto(AggregateRoot entity)
+    public override Dto ToDto(Entity entity)
     {
         var shipment = (Shipment)entity;
         Id = shipment.Id;

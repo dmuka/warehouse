@@ -13,7 +13,7 @@ namespace Warehouse.Presentation.Controllers;
 public class ReceiptsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<ReceiptDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<ReceiptResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetReceipts()
     {
         var query = new GetReceiptsQuery();
@@ -28,7 +28,7 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> Create([FromBody] ReceiptDto dto)
     {
-        var command = new CreateReceiptCommand(dto.ReceiptNumber, dto.ReceiptDate);
+        var command = new CreateReceiptCommand(dto.ReceiptNumber, dto.ReceiptDate, dto.Items);
         
         var result = await mediator.Send(command);
 

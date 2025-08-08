@@ -1,4 +1,5 @@
-﻿using Warehouse.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Balances.Specifications;
 using Warehouse.Domain.Aggregates.Resources;
@@ -8,6 +9,8 @@ namespace Warehouse.Domain.Aggregates.Receipts;
 
 public class ReceiptItem : Entity
 {
+    [Key]
+    public new ReceiptItemId Id { get; protected set; } = null!;
     public ReceiptId ReceiptId { get; private set; } = null!;
     public ResourceId ResourceId { get; private set; } = null!;
     public UnitId UnitId { get; private set; } = null!;
@@ -19,8 +22,10 @@ public class ReceiptItem : Entity
         ReceiptId receiptId,
         ResourceId resourceId,
         UnitId unitId,
-        decimal quantity)
+        decimal quantity,
+        ReceiptItemId receiptItemId)
     {
+        Id = receiptItemId; 
         ReceiptId = receiptId;
         ResourceId = resourceId;
         UnitId = unitId;
@@ -31,7 +36,8 @@ public class ReceiptItem : Entity
         Guid receiptId,
         Guid resourceId,
         Guid unitId,
-        decimal quantity)
+        decimal quantity,
+        Guid? receiptItemId = null)
     {
         var validationResults = ValidateItemDetails(quantity);
         if (validationResults.Length != 0)
@@ -41,7 +47,8 @@ public class ReceiptItem : Entity
             new ReceiptId(receiptId),
             new ResourceId(resourceId),
             new UnitId(unitId),
-            quantity);
+            quantity,
+            receiptItemId is null ? new ReceiptItemId(Guid.CreateVersion7()) : new ReceiptItemId(receiptItemId.Value));
     }
 
     private static Result[] ValidateItemDetails(decimal quantity)

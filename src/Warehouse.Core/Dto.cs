@@ -7,8 +7,8 @@ public abstract class Dto
 {
     [Key] 
     public Guid? Id { get; set; }
-    public abstract AggregateRoot ToEntity();
-    public abstract Dto ToDto(AggregateRoot entity);
+    public abstract Entity ToEntity();
+    public abstract Dto ToDto(Entity entity);
 
     public class EntityToDtoMapper<TEntity, TEntityDto>
     {

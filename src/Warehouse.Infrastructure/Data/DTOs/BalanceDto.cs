@@ -19,12 +19,12 @@ public class BalanceDto : Dto
     public ResourceDto ResourceDto { get; set; } = null!;
     public UnitDto UnitDto { get; set; } = null!;
 
-    public override AggregateRoot ToEntity()
+    public override Entity ToEntity()
     {
         return Balance.Create(ResourceId, UnitId, Quantity, Id).Value;
     }
 
-    public override Dto ToDto(AggregateRoot entity)
+    public override Dto ToDto(Entity entity)
     {
         var balance = (Balance)entity;
         Id = balance.Id;

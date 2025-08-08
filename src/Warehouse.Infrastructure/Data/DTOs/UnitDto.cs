@@ -17,12 +17,12 @@ public class UnitDto : Dto
     }
     public string UnitName { get; set; } = string.Empty;
     public bool IsActive { get; set; }
-    public override AggregateRoot ToEntity()
+    public override Entity ToEntity()
     {
         return Unit.Create(UnitName, IsActive, Id).Value;
     }
 
-    public override Dto ToDto(AggregateRoot entity)
+    public override Dto ToDto(Entity entity)
     {
         var unit = (Unit)entity;
         Id = unit.Id;

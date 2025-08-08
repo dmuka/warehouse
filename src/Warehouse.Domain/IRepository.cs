@@ -6,7 +6,7 @@ namespace Warehouse.Domain
     /// <summary>
     /// Contains base repository methods. If you register the multiple DbContexts, it will use the last one.
     /// </summary>
-    public interface IRepository<TEntity> where TEntity : Entity 
+    public interface IRepository<TEntity> where TEntity : Entity
     {
         /// <summary>
         /// Gets <see cref="IQueryable{T}"/> of the entity.
@@ -27,14 +27,15 @@ namespace Warehouse.Domain
         Task<IList<TEntity>> QueryableToListAsync(IQueryable<TEntity> query, CancellationToken cancellationToken);
 
         #region Get list
-        
+
         /// <summary>
-        /// This method returns <see cref="IList{TEntity}"/> without any filter. Call only when you want to pull all the data from the source.
+        /// Asynchronously retrieves a list of all entities of type <typeparamref name="TEntity"/> from the data source.
         /// </summary>
+        /// <param name="include">An optional function to include related entities in the query.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="cancellationToken"> A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
-        /// <returns>Returns <see cref="Task"/> of <see cref="IList{TEntity}"/>.</returns>
-        Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default);
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation, with a result of <see cref="IList{TEntity}"/> containing all entities.</returns>
+        Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default, Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null);
 
         #endregion
 

@@ -18,13 +18,18 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
+    public async Task<IList<TEntity>> GetListAsync(
+        CancellationToken cancellationToken = default,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
     {
-        var entities = await context.Set<TEntity>()
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-        
-        return entities;
+        var query = context.Set<TEntity>().AsNoTracking();
+    
+        if (include != null)
+        {
+            query = include(query);
+        }
+    
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<TEntity?> GetByIdAsync(TypedId id, CancellationToken cancellationToken = default)

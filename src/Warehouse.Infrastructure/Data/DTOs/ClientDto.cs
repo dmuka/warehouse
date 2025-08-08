@@ -18,12 +18,12 @@ public class ClientDto : Dto
     public string ClientName { get; set; } = string.Empty;
     public string ClientAddress { get; set; } = string.Empty;
     public bool IsActive { get; set; }
-    public override AggregateRoot ToEntity()
+    public override Entity ToEntity()
     {
         return Client.Create(ClientName, ClientAddress, IsActive, Id).Value;
     }
 
-    public override Dto ToDto(AggregateRoot entity)
+    public override Dto ToDto(Entity entity)
     {
         var client = (Client)entity;
         Id = client.Id;

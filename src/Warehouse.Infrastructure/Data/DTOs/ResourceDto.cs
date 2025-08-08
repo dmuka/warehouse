@@ -17,12 +17,12 @@ public class ResourceDto : Dto
     }
     public string ResourceName { get; set; } = string.Empty;
     public bool IsActive { get; set; }
-    public override AggregateRoot ToEntity()
+    public override Entity ToEntity()
     {
         return Resource.Create(ResourceName, IsActive, Id).Value;
     }
 
-    public override Dto ToDto(AggregateRoot entity)
+    public override Dto ToDto(Entity entity)
     {
         var resource = (Resource)entity;
         Id = resource.Id;

@@ -14,7 +14,7 @@ internal class ReceiptItemConfiguration : IEntityTypeConfiguration<ReceiptItem>
         
         builder.HasKey(item => item.Id);
         builder.Property(item => item.Id)
-            .HasConversion(id => id.Value, value => new ReceiptId(value));
+            .HasConversion(id => id.Value, value => new ReceiptItemId(value));
         
         builder.Property(item => item.ReceiptId)
             .HasConversion(id => id.Value, value => new ReceiptId(value));
