@@ -10,7 +10,7 @@ namespace Warehouse.Application.UseCases.Receipts;
 public record CreateReceiptCommand(
     string Number,
     DateTime Date,
-    IList<ReceiptItemDto> Items) : IRequest<Result<ReceiptId>>;
+    IList<ReceiptItemRequest> Items) : IRequest<Result<ReceiptId>>;
 
 public sealed class CreateReceiptCommandHandler(
     IReceiptRepository repository,

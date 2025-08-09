@@ -21,7 +21,7 @@ public sealed class CreateResourceCommandHandler(
             .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) return Result.Failure<ResourceId>(specificationResult.Error);
 
-        var resourceCreationResult = Resource.Create(request.Dto.ResourceName, request.Dto.IsActive, request.Dto.Id);
+        var resourceCreationResult = Resource.Create(request.Dto.ResourceName, request.Dto.IsActive);
         if (resourceCreationResult.IsFailure) return Result.Failure<ResourceId>(resourceCreationResult.Error);
         
         repository.Add(resourceCreationResult.Value);

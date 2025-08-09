@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Receipts;
-using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
 
@@ -24,11 +23,23 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(ReceiptDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ReceiptRequest), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ReceiptDto dto)
+    public async Task<IResult> Create([FromBody] ReceiptRequest request)
     {
-        var command = new CreateReceiptCommand(dto.ReceiptNumber, dto.ReceiptDate, dto.Items);
+        var command = new CreateReceiptCommand(request.ReceiptNumber, request.ReceiptDate, request.Items);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
+    
+    [HttpGet("{id:Guid}")]
+    [ProducesResponseType(typeof(ReceiptResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> GetById(Guid id)
+    {
+        var command = new GetReceiptByIdQuery(id);
         
         var result = await mediator.Send(command);
 

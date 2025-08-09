@@ -22,7 +22,7 @@ public sealed class CreateUnitCommandHandler(
             .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) return Result.Failure<UnitId>(specificationResult.Error);
 
-        var unitResult = Unit.Create(request.Dto.UnitName, request.Dto.IsActive, request.Dto.Id);
+        var unitResult = Unit.Create(request.Dto.UnitName, request.Dto.IsActive);
         if (unitResult.IsFailure) return Result.Failure<UnitId>(unitResult.Error);
 
         repository.Add(unitResult.Value);

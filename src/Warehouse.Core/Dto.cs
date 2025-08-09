@@ -3,10 +3,10 @@ using System.Linq.Expressions;
 
 namespace Warehouse.Core;
 
-public abstract class Dto
+public abstract class Dto : Entity
 {
     [Key] 
-    public Guid? Id { get; set; }
+    public new Guid Id { get; set; }
     public abstract Entity ToEntity();
     public abstract Dto ToDto(Entity entity);
 

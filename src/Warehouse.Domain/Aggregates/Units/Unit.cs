@@ -38,6 +38,17 @@ public class Unit : AggregateRoot
         return Result.Success(unit);
     }
 
+    public Result UpdateDetails(string name)
+    {
+        var nameResult = UnitName.Create(name);
+        
+        if (nameResult.IsFailure) return nameResult;
+
+        UnitName = nameResult.Value;
+        
+        return Result.Success();
+    }
+
     public Result SetName(string name)
     {
         var validation = new UnitNameMustBeValid(name).IsSatisfied();

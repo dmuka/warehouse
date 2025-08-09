@@ -24,8 +24,7 @@ public sealed class CreateClientCommandHandler(
         var clientResult = Client.Create(
             request.Dto.ClientName,
             request.Dto.ClientAddress,
-            request.Dto.IsActive,
-            request.Dto.Id);
+            request.Dto.IsActive);
         if (clientResult.IsFailure) return Result.Failure<ClientId>(clientResult.Error);
 
         repository.Add(clientResult.Value);

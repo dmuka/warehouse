@@ -26,13 +26,25 @@ public class ClientsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ClientDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ClientDto resourceDto)
+    public async Task<IResult> Create([FromBody] ClientDto clientDto)
     {
-        var command = new CreateClientCommand(resourceDto);
+        var command = new CreateClientCommand(clientDto);
         
         var result = await mediator.Send(command);
 
         return result.Match(Results.Ok, CustomResults.Problem);
+    }
+    
+    [HttpPut("update")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> Update([FromBody] ClientDto clientDto)
+    {
+        var command = new UpdateClientCommand(clientDto);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
     }
     
     [HttpGet("{id:Guid}")]

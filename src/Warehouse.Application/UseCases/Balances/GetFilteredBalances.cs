@@ -6,8 +6,8 @@ using Warehouse.Infrastructure.Data.DTOs;
 namespace Warehouse.Application.UseCases.Balances;
 
 public record GetFilteredBalancesQuery(
-    List<string>? ResourceNames, 
-    List<string>? UnitNames) : IRequest<Result<IList<BalanceDto2>>>;
+    List<Guid> ResourceNames, 
+    List<Guid> UnitNames) : IRequest<Result<IList<BalanceDto2>>>;
 
 public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> balanceRepository) 
     : IRequestHandler<GetFilteredBalancesQuery, Result<IList<BalanceDto2>>>
@@ -16,20 +16,34 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
         GetFilteredBalancesQuery request,
         CancellationToken cancellationToken)
     {
-        var query = balanceRepository.GetQueryable();
+        var unIds = string.Join(',', request.UnitNames);
         
-        if (request.ResourceNames?.Count > 0)
+        var sql = """
+                           select
+                           Balances.Id,
+                           Resources.ResourceName,
+                           Units.UnitName,
+                           Balances.Quantity
+                           from Balances
+                               inner join Resources on Balances.ResourceId = Resources.Id
+                               inner join Units on Balances.UnitId = Units.Id
+                           where Resources.IsActive = 1 and Units.IsActive = 1
+                           """;
+
+        if (request.ResourceNames.Count > 0)
         {
-            query = query.Where(b => request.ResourceNames.Contains(b.ResourceName));
+            var resourcesIds = string.Join(',', request.ResourceNames);
+            sql += $" and Resources.Id in('{resourcesIds}')";
         }
 
-        if (request.UnitNames?.Count > 0)
+        if (request.UnitNames.Count > 0)
         {
-            query = query.Where(b => request.UnitNames.Contains(b.UnitName));
+            var unitsIds = string.Join(',', request.UnitNames);
+            sql += $" and Units.Id in('{unitsIds}')";
         }
         
-        var balances = await balanceRepository.QueryableToListAsync(query, cancellationToken);
+        var dtos = await balanceRepository.GetFromRawSqlAsync(sql, null, cancellationToken: cancellationToken);
 
-        return Result.Success(balances);
+        return Result.Success(dtos);
     }
 }
