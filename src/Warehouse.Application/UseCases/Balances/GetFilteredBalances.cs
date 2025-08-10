@@ -16,8 +16,6 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
         GetFilteredBalancesQuery request,
         CancellationToken cancellationToken)
     {
-        var unIds = string.Join(',', request.UnitNames);
-        
         var sql = """
                            select
                            Balances.Id,

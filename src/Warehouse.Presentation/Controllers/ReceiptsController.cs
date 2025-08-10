@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Receipts;
+using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
 
@@ -16,6 +17,23 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     public async Task<IResult> GetReceipts()
     {
         var query = new GetReceiptsQuery();
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
+
+    [HttpPost("filter")]
+    [ProducesResponseType(typeof(IList<ReceiptResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> GetFiltered([FromBody] ReceiptFilterDto filter)
+    {
+        var query = new GetFilteredReceiptsQuery(
+            filter.DateFrom, 
+            filter.DateTo, 
+            filter.ReceiptNumber, 
+            filter.ResourceIds, 
+            filter.UnitIds);
         
         var result = await mediator.Send(query);
 
