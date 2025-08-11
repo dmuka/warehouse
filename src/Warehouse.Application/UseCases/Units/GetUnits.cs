@@ -1,21 +1,25 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Units.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Units;
-using Unit = Warehouse.Domain.Aggregates.Units.Unit;
 
 namespace Warehouse.Application.UseCases.Units;
 
-public record GetUnitsQuery : IRequest<Result<IList<Unit>>>;
+public record GetUnitsQuery : IRequest<Result<IList<UnitResponse>>>;
 
 public sealed class GetBalancesQueryHandler(
-    IUnitRepository clientRepository) : IRequestHandler<GetUnitsQuery, Result<IList<Unit>>>
+    IUnitRepository unitRepository) : IRequestHandler<GetUnitsQuery, Result<IList<UnitResponse>>>
 {
-    public async Task<Result<IList<Unit>>> Handle(
+    public async Task<Result<IList<UnitResponse>>> Handle(
         GetUnitsQuery request,
         CancellationToken cancellationToken)
     {
-        var units = await clientRepository.GetListAsync(cancellationToken);
+        var units = await unitRepository.GetListAsync(cancellationToken);
 
-        return Result.Success(units);
+        var response = units
+            .Select(unit => new UnitResponse(unit.Id.Value, unit.UnitName.Value, unit.IsActive))
+            .ToList(); 
+
+        return Result.Success<IList<UnitResponse>>(response);
     }
 }

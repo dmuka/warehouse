@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Receipts;
+using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -45,7 +46,7 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> Create([FromBody] ReceiptRequest request)
     {
-        var command = new CreateReceiptCommand(request.ReceiptNumber, request.ReceiptDate, request.Items);
+        var command = new CreateReceiptCommand(request);
         
         var result = await mediator.Send(command);
 

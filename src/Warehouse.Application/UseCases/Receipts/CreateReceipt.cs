@@ -1,16 +1,13 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Application.UseCases.Receipts.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Application.UseCases.Receipts;
 
-public record CreateReceiptCommand(
-    string Number,
-    DateTime Date,
-    IList<ReceiptItemRequest> Items) : IRequest<Result<ReceiptId>>;
+public record CreateReceiptCommand(ReceiptRequest ReceiptRequest) : IRequest<Result<ReceiptId>>;
 
 public sealed class CreateReceiptCommandHandler(
     IReceiptRepository repository,
@@ -20,16 +17,16 @@ public sealed class CreateReceiptCommandHandler(
         CreateReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var specificationResult = await new ReceiptNumberMustBeUnique(request.Number, repository)
+        var specificationResult = await new ReceiptNumberMustBeUnique(request.ReceiptRequest.ReceiptNumber, repository)
             .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) 
             return Result.Failure<ReceiptId>(specificationResult.Error);
 
         var receiptId = Guid.CreateVersion7();
         var receiptResult = Receipt.Create(
-            request.Number, 
-            request.Date,
-            request.Items.Select(i => 
+            request.ReceiptRequest.ReceiptNumber, 
+            request.ReceiptRequest.ReceiptDate,
+            request.ReceiptRequest.Items.Select(i => 
                 ReceiptItem.Create(receiptId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
             receiptId);
     

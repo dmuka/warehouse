@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Infrastructure.Data;
 

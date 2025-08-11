@@ -1,4 +1,4 @@
-﻿namespace Warehouse.Application.UseCases.Receipts;
+﻿namespace Warehouse.Application.UseCases.Receipts.Dtos;
 
 public class ReceiptItemResponse
 {
