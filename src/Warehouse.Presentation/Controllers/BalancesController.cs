@@ -35,6 +35,18 @@ public class BalancesController(IMediator mediator) : ControllerBase
 
         return result.Match(Results.Ok, CustomResults.Problem);
     }
+
+    [HttpPost("available")]
+    [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> GetFiltered([FromBody] AvailableDto dto)
+    {
+        var query = new GetAvailableByResourceAndUnitQuery(dto.ResourceId, dto.UnitId);
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
     
     [HttpGet("{resourceId:Guid}/{unitId:Guid}")]
     [ProducesResponseType(typeof(BalanceDto), StatusCodes.Status200OK)]
