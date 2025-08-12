@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Shipments.Dtos;
+using Warehouse.Application.UseCases.Shipments.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
@@ -6,10 +8,7 @@ using Warehouse.Domain.Aggregates.Shipments;
 
 namespace Warehouse.Application.UseCases.Shipments;
 
-public record CreateShipmentCommand(
-    string Number,
-    DateTime Date,
-    Guid ClientId) : IRequest<Result<ShipmentId>>;
+public record CreateShipmentCommand(ShipmentRequest ShipmentRequest) : IRequest<Result<ShipmentId>>;
 
 public sealed class CreateShipmentCommandHandler(
     IShipmentRepository shipmentRepository,
@@ -20,20 +19,34 @@ public sealed class CreateShipmentCommandHandler(
         CreateShipmentCommand request,
         CancellationToken cancellationToken)
     {
-        var clientExists = await clientRepository.ExistsByIdAsync(
-            new ClientId(request.ClientId),
-            cancellationToken);
-        if (!clientExists) return Result.Failure<ShipmentId>(ShipmentErrors.NotFound(request.ClientId));
+        var specificationResult = await new ShipmentNumberMustBeUnique(request.ShipmentRequest.ShipmentNumber, shipmentRepository)
+            .IsSatisfiedAsync(cancellationToken);
+        if (specificationResult.IsFailure) return Result.Failure<ShipmentId>(specificationResult.Error);
 
+        var shipmentId = Guid.CreateVersion7();
         var shipmentResult = Shipment.Create(
-            request.Number,
-            request.Date,
-            request.ClientId);
+            request.ShipmentRequest.ShipmentNumber, 
+            request.ShipmentRequest.ShipmentDate,
+            request.ShipmentRequest.ClientId,
+            request.ShipmentRequest.Items.Select(i => 
+                ShipmentItem.Create(shipmentId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
+            shipmentId);
+    
         if (shipmentResult.IsFailure) return Result.Failure<ShipmentId>(shipmentResult.Error);
 
-        shipmentRepository.Add(shipmentResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return Result.Success(shipmentResult.Value.Id);
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        
+        try
+        {
+            shipmentRepository.Add(shipmentResult.Value);
+            await unitOfWork.CommitAsync(cancellationToken);
+            
+            return Result.Success(shipmentResult.Value.Id);
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }

@@ -12,10 +12,10 @@ public sealed class RemoveClientByIdQueryHandler(IClientRepository repository, I
     public async Task<Result> Handle(RemoveClientByIdQuery request, CancellationToken cancellationToken)
     {
         var id = new ClientId(request.Id);
-        var isClientExist = await repository.ExistsByIdAsync(id, cancellationToken);
-        if (!isClientExist) return Result.Failure<Client>(ClientErrors.NotFound(request.Id));
+        var client = await repository.GetByIdAsync(id, cancellationToken);
+        if (client is null) return Result.Failure<Client>(ClientErrors.NotFound(request.Id));
 
-        await repository.Delete(id);
+        repository.Delete(client);
         await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();

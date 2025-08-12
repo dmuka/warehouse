@@ -3,6 +3,7 @@ using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Clients;
 using Warehouse.Domain.Aggregates.Resources;
+using Warehouse.Domain.Aggregates.Shipments.DomainEvents;
 using Warehouse.Domain.Aggregates.Shipments.Specifications;
 using Warehouse.Domain.Aggregates.Units;
 
@@ -17,20 +18,22 @@ public class Shipment : AggregateRoot
     public ClientId ClientId { get; private set; } = null!;
     public ShipmentStatus Status { get; private set; }
     public IReadOnlyCollection<ShipmentItem> Items => _items.AsReadOnly();
-    private readonly List<ShipmentItem> _items = [];
+    private readonly IList<ShipmentItem> _items = [];
 
     protected Shipment() { }
 
     private Shipment(
         string number,
         DateTime date,
-        ClientId clientId,
+        ClientId clientId, 
+        IList<ShipmentItem> items,
         ShipmentId shipmentId)
     {
         Number = number;
         Date = date;
         ClientId = clientId;
         Id = shipmentId;
+        _items = items;
         Status = ShipmentStatus.Draft;
     }
 
@@ -38,17 +41,30 @@ public class Shipment : AggregateRoot
         string number,
         DateTime date,
         Guid clientId,
+        IList<ShipmentItem> items,
         Guid? shipmentId = null)
     {
         var validationResults = ValidateShipmentDetails(number);
         if (validationResults.Length != 0)
             return Result<Shipment>.ValidationFailure(ValidationError.FromResults(validationResults));
 
-        return new Shipment(
+        var shipment = new Shipment(
             number,
             date,
             new ClientId(clientId),
+            items,
             shipmentId is null ? new ShipmentId(Guid.NewGuid()) : new ShipmentId(shipmentId.Value));
+        
+        shipment.AddDomainEvent(new ShipmentCreatedDomainEvent(
+            shipment.Id,
+            items.Select(i => ShipmentItem.Create(
+                shipment.Id,
+                i.ResourceId.Value,
+                i.UnitId.Value,
+                i.Quantity,
+                i.Id).Value).ToList()));
+
+        return shipment;
     }
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)

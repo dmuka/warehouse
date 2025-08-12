@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class ReceiptRepository(WarehouseDbContext context) : Repository<Receipt>(context), IReceiptRepository 
+public class ReceiptRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
+    : Repository<Receipt>(context, unitOfWork), IReceiptRepository 
 {
     private readonly WarehouseDbContext _context = context;
     

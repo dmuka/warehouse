@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Warehouse.Core.Results;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Resources;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class ResourceRepository(WarehouseDbContext context) : Repository<Resource>(context), IResourceRepository 
+public class ResourceRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
+    : Repository<Resource>(context, unitOfWork), IResourceRepository 
 {
     private readonly WarehouseDbContext _context = context;
 

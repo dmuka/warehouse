@@ -64,4 +64,16 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
 
         return result.Match(Results.Ok, CustomResults.Problem);
     }
+    
+    [HttpDelete("delete/{id:Guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> DeleteById(Guid id)
+    {
+        var command = new RemoveReceiptByIdQuery(id);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
 }

@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Shipments;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class ShipmentRepository(WarehouseDbContext context) : Repository<Shipment>(context), IShipmentRepository
+public class ShipmentRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
+    : Repository<Shipment>(context, unitOfWork), IShipmentRepository
 {
     private readonly WarehouseDbContext _context = context;
     

@@ -1,6 +1,6 @@
-﻿namespace Warehouse.Application.UseCases.Receipts.Dtos;
+﻿namespace Warehouse.Application.UseCases.Shipments.Dtos;
 
-public class ReceiptItemRequest
+public class ShipmentItemRequest
 {
     public Guid ResourceId { get; set; }
     public string ResourceName { get; set; } = string.Empty;

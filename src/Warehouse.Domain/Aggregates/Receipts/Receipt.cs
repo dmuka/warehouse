@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Warehouse.Core;
 using Warehouse.Core.Results;
-using Warehouse.Domain.Aggregates.Receipts.Specifications;
+using Warehouse.Domain.Aggregates.Receipts.DomainEvents;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
 
@@ -19,7 +19,11 @@ public class Receipt : AggregateRoot
 
     protected Receipt() { }
 
-    private Receipt(string number, DateTime date, IList<ReceiptItem> items, ReceiptId receiptId)
+    private Receipt(
+        string number, 
+        DateTime date, 
+        IList<ReceiptItem> items, 
+        ReceiptId receiptId)
     {
         Number = number;
         Date = date;
@@ -37,11 +41,29 @@ public class Receipt : AggregateRoot
         if (validationResults.Length != 0)
             return Result<Receipt>.ValidationFailure(ValidationError.FromResults(validationResults));
         
-        return new Receipt(
+        var receipt = new Receipt(
             number,
             date,
             items,
             receiptId is null ? new ReceiptId(Guid.NewGuid()) : new ReceiptId(receiptId.Value));
+        
+        receipt.AddDomainEvent(new ReceiptCreatedDomainEvent(
+            receipt.Id,
+            items.Select(i => ReceiptItem.Create(
+                receipt.Id,
+                i.ResourceId.Value,
+                i.UnitId.Value,
+                i.Quantity,
+                i.Id).Value).ToList()));
+
+        return receipt;
+    }
+    
+    public void Remove()
+    {
+        AddDomainEvent(new ReceiptRemovedDomainEvent(
+            Id,
+            Items.ToList()));
     }
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)

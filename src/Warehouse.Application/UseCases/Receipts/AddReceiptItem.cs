@@ -15,7 +15,6 @@ public record AddReceiptItemCommand(
 
 public sealed class AddReceiptItemCommandHandler(
     IReceiptRepository receiptRepository,
-    IResourceRepository resourceRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<AddReceiptItemCommand, Result>
 {
     public async Task<Result> Handle(
@@ -35,8 +34,7 @@ public sealed class AddReceiptItemCommandHandler(
             new UnitId(request.UnitId),
             request.Quantity);
 
-        if (result.IsFailure)
-            return result;
+        if (result.IsFailure) return result;
 
         receiptRepository.Update(receipt);
         await unitOfWork.CommitAsync(cancellationToken);

@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Warehouse.Core.Results;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
-using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class ClientRepository(WarehouseDbContext context) : Repository<Client>(context), IClientRepository 
+public class ClientRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
+    : Repository<Client>(context, unitOfWork), IClientRepository 
 {
     private readonly WarehouseDbContext _context = context;
 

@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Shipments;
-using Warehouse.Infrastructure.Data.DTOs;
+using Warehouse.Application.UseCases.Shipments.Dtos;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
 
@@ -13,7 +13,7 @@ namespace Warehouse.Presentation.Controllers;
 public class ShipmentsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<ShipmentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<ShipmentResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetShipments()
     {
         var query = new GetShipmentsQuery();
@@ -24,11 +24,11 @@ public class ShipmentsController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(ShipmentDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ShipmentRequest), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ShipmentDto dto)
+    public async Task<IResult> Create([FromBody] ShipmentRequest dto)
     {
-        var command = new CreateShipmentCommand(dto.ShipmentNumber, dto.ShipmentDate, dto.ClientId);
+        var command = new CreateShipmentCommand(dto);
         
         var result = await mediator.Send(command);
 

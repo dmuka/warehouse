@@ -19,8 +19,10 @@ public class ShipmentItem : Entity
         ShipmentId shipmentId,
         ResourceId resourceId,
         UnitId unitId,
-        decimal quantity)
+        decimal quantity,
+        ShipmentItemId shipmentItemId)
     {
+        Id = shipmentItemId;
         ShipmentId = shipmentId;
         ResourceId = resourceId;
         UnitId = unitId;
@@ -28,20 +30,22 @@ public class ShipmentItem : Entity
     }
 
     public static Result<ShipmentItem> Create(
-        ShipmentId shipmentId,
-        ResourceId resourceId,
-        UnitId unitId,
-        decimal quantity)
+        Guid shipmentId,
+        Guid resourceId,
+        Guid unitId,
+        decimal quantity,
+        Guid? shipmentItemId = null)
     {
         var validationResults = ValidateItemDetails(quantity);
         if (validationResults.Length != 0)
             return Result<ShipmentItem>.ValidationFailure(ValidationError.FromResults(validationResults));
 
         return new ShipmentItem(
-            shipmentId,
-            resourceId,
-            unitId,
-            quantity);
+            new ShipmentId(shipmentId),
+            new ResourceId(resourceId),
+            new UnitId(unitId),
+            quantity,
+            shipmentItemId is null ? new ShipmentItemId(Guid.CreateVersion7()) : new ShipmentItemId(shipmentItemId.Value));
     }
 
     private static Result[] ValidateItemDetails(decimal quantity)

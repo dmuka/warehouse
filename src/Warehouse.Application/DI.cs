@@ -10,7 +10,7 @@ public static class DI
         {
             config.RegisterServicesFromAssembly(typeof(DI).Assembly);
         });
-
+        
         return services;
     }
 }

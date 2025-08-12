@@ -12,10 +12,10 @@ public sealed class RemoveResourceByIdQueryHandler(IResourceRepository repositor
     public async Task<Result> Handle(RemoveResourceByIdQuery request, CancellationToken cancellationToken)
     {
         var id = new ResourceId(request.Id);
-        var isResourceExist = await repository.ExistsByIdAsync(id, cancellationToken);
-        if (!isResourceExist) return Result.Failure<Resource>(ResourceErrors.NotFound(request.Id));
+        var resource = await repository.GetByIdAsync(id, cancellationToken);
+        if (resource is null) return Result.Failure<Resource>(ResourceErrors.NotFound(request.Id));
 
-        await repository.Delete(id);
+        repository.Delete(resource);
         await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();

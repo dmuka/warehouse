@@ -6,12 +6,12 @@ using Warehouse.Infrastructure.Data;
 
 namespace Warehouse.Application.UseCases.Receipts;
 
-public record GetReceiptsQuery : IRequest<Result<List<ReceiptResponse>>>;
+public record GetReceiptsQuery : IRequest<Result<IList<ReceiptResponse>>>;
 
 public sealed class GetReceiptsQueryHandler(WarehouseDbContext context) 
-    : IRequestHandler<GetReceiptsQuery, Result<List<ReceiptResponse>>>
+    : IRequestHandler<GetReceiptsQuery, Result<IList<ReceiptResponse>>>
 {
-    public async Task<Result<List<ReceiptResponse>>> Handle(
+    public async Task<Result<IList<ReceiptResponse>>> Handle(
         GetReceiptsQuery request,
         CancellationToken cancellationToken)
     {
@@ -32,6 +32,6 @@ public sealed class GetReceiptsQueryHandler(WarehouseDbContext context)
                 }).ToList()
             }).ToListAsync(cancellationToken);
 
-        return Result.Success(receipts);
+        return Result.Success<IList<ReceiptResponse>>(receipts);
     }
 }

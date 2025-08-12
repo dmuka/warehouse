@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Balances;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class BalanceRepository(WarehouseDbContext context) : Repository<Balance>(context), IBalanceRepository 
+public class BalanceRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
+    : Repository<Balance>(context, unitOfWork), IBalanceRepository 
 {
     private readonly WarehouseDbContext _context = context;
     

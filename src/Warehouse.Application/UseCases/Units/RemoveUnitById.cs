@@ -13,10 +13,10 @@ public sealed class RemoveUnitByIdQueryHandler(IUnitRepository repository, IUnit
     public async Task<Result> Handle(RemoveUnitByIdQuery request, CancellationToken cancellationToken)
     {
         var id = new UnitId(request.Id);
-        var isUnitExist = await repository.ExistsByIdAsync(id, cancellationToken);
-        if (!isUnitExist) return Result.Failure<Unit>(UnitErrors.NotFound(request.Id));
+        var unit = await repository.GetByIdAsync(id, cancellationToken);
+        if (unit is null) return Result.Failure<Unit>(UnitErrors.NotFound(request.Id));
 
-        await repository.Delete(id);
+        repository.Delete(unit);
         await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();

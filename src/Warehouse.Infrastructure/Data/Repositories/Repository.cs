@@ -5,7 +5,7 @@ using Warehouse.Domain;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEntity>
+public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfWork) : IRepository<TEntity>
     where TEntity : Entity
 {
     public IQueryable<TEntity> GetQueryable()
@@ -69,20 +69,19 @@ public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEnti
     public void Add(TEntity entity)
     {
         context.Set<TEntity>().Add(entity);
+        unitOfWork.TrackDomainEvents(entity);
     }
 
     public void Update(TEntity entity)
     {
         context.Set<TEntity>().Update(entity);
+        unitOfWork.TrackDomainEvents(entity);
     }
 
-    public async Task Delete(TypedId entityId)
+    public void Delete(TEntity entity)
     {
-        var entity = await context.Set<TEntity>().FindAsync(entityId);
-        if (entity is not null)
-        {
-            context.Set<TEntity>().Remove(entity);
-        }
+        context.Set<TEntity>().Remove(entity);
+        unitOfWork.TrackDomainEvents(entity);
     }
 
     public async Task<IList<TEntity>> GetEntitiesByCondition(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)

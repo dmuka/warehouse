@@ -10,14 +10,14 @@ namespace Warehouse.Application.UseCases.Receipts;
 public record CreateReceiptCommand(ReceiptRequest ReceiptRequest) : IRequest<Result<ReceiptId>>;
 
 public sealed class CreateReceiptCommandHandler(
-    IReceiptRepository repository,
+    IReceiptRepository receiptRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateReceiptCommand, Result<ReceiptId>>
 {
     public async Task<Result<ReceiptId>> Handle(
         CreateReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var specificationResult = await new ReceiptNumberMustBeUnique(request.ReceiptRequest.ReceiptNumber, repository)
+        var specificationResult = await new ReceiptNumberMustBeUnique(request.ReceiptRequest.ReceiptNumber, receiptRepository)
             .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) 
             return Result.Failure<ReceiptId>(specificationResult.Error);
@@ -30,12 +30,21 @@ public sealed class CreateReceiptCommandHandler(
                 ReceiptItem.Create(receiptId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
             receiptId);
     
-        if (receiptResult.IsFailure) 
-            return Result.Failure<ReceiptId>(receiptResult.Error);
+        if (receiptResult.IsFailure) return Result.Failure<ReceiptId>(receiptResult.Error);
 
-        repository.Add(receiptResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return Result.Success(receiptResult.Value.Id);
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        
+        try
+        {
+            receiptRepository.Add(receiptResult.Value);
+            await unitOfWork.CommitAsync(cancellationToken);
+            
+            return Result.Success(receiptResult.Value.Id);
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }

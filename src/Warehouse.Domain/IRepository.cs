@@ -133,8 +133,9 @@ namespace Warehouse.Domain
         /// This method takes an <typeparamref name="TEntity"/>, mark the object as <see cref="EntityState.Deleted"/> to the <see cref="ChangeTracker"/> of the <see cref="DbContext"/>.
         /// </summary>
         /// <typeparam name="TEntity">The type of the <paramref name="entityId"/> to be marked as deleted.</typeparam>
-        /// <param name="entityId">The primary key value of the entity.</param>
-        Task Delete(TypedId entityId);
+        
+        /// <param name="entity">The <typeparamref name="TEntity"/> object to be deleted to the database on <see cref="SaveChangesAsync(CancellationToken)"/>.</param>
+        void Delete(TEntity entity);
         
         #endregion
 
