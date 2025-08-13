@@ -5,7 +5,7 @@ namespace Warehouse.Presentation.Infrastructure.DbCreate;
 
 public static class DbCheck
 {
-    public static async Task EnsureDbCreatedAndMigratedMigratedAsync(this WebApplication app)
+    public static async Task EnsureDbCreatedAndMigratedAsync(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var services = scope.ServiceProvider;
@@ -19,13 +19,14 @@ public static class DbCheck
             {
                 logger.LogInformation("Database doesn't exist - creating...");
                 await dbContext.Database.EnsureCreatedAsync();
+            }
                 
-                if (!dbContext.Database.GetMigrations().Any())
-                {
-                    logger.LogWarning("No migrations exist. Please create initial migration using CLI:");
-                    logger.LogWarning("dotnet ef migrations add InitialMigration");
-                    return;
-                }
+            if (!dbContext.Database.GetMigrations().Any())
+            {
+                logger.LogCritical(
+                    "No migrations exist. Please create initial migration using CLI:{ NewLine }dotnet ef migrations add InitialMigration", Environment.NewLine); 
+                                   
+                Environment.Exit(1);
             }
             
             var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
