@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Balances.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Infrastructure.Data.DTOs;
@@ -7,12 +8,12 @@ namespace Warehouse.Application.UseCases.Balances;
 
 public record GetFilteredBalancesQuery(
     List<Guid> ResourceNames, 
-    List<Guid> UnitNames) : IRequest<Result<IList<BalanceDto2>>>;
+    List<Guid> UnitNames) : IRequest<Result<IList<BalanceResponse>>>;
 
 public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> balanceRepository) 
-    : IRequestHandler<GetFilteredBalancesQuery, Result<IList<BalanceDto2>>>
+    : IRequestHandler<GetFilteredBalancesQuery, Result<IList<BalanceResponse>>>
 {
-    public async Task<Result<IList<BalanceDto2>>> Handle(
+    public async Task<Result<IList<BalanceResponse>>> Handle(
         GetFilteredBalancesQuery request,
         CancellationToken cancellationToken)
     {
@@ -42,6 +43,8 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
         
         var dtos = await balanceRepository.GetFromRawSqlAsync(sql, null, cancellationToken: cancellationToken);
 
-        return Result.Success(dtos);
+        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceName, dto.UnitName, dto.Quantity)).ToList();
+        
+        return Result.Success<IList<BalanceResponse>>(response);
     }
 }

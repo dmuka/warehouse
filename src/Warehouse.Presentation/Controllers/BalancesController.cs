@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Balances;
+using Warehouse.Application.UseCases.Balances.Dtos;
 using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
@@ -14,7 +15,7 @@ namespace Warehouse.Presentation.Controllers;
 public class BalancesController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<BalanceDto2>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<BalanceResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetBalances()
     {
         var query = new GetBalancesQuery();
@@ -25,7 +26,7 @@ public class BalancesController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("filter")]
-    [ProducesResponseType(typeof(IList<BalanceDto2>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<BalanceResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> GetFiltered([FromBody] BalanceFilterDto filter)
     {
@@ -39,7 +40,7 @@ public class BalancesController(IMediator mediator) : ControllerBase
     [HttpPost("available")]
     [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> GetFiltered([FromBody] AvailableDto dto)
+    public async Task<IResult> GetFiltered([FromBody] AvailableBalanceRequest dto)
     {
         var query = new GetAvailableByResourceAndUnitQuery(dto.ResourceId, dto.UnitId);
         
