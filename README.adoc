@@ -1,7 +1,152 @@
-= Warehouse
-dmuka; Dmitry Belousov
+= Warehouse Application
 :toc:
+:toc-title: Table of Contents
+:sectnums:
+:imagesdir: docs/images
 
 image:https://img.shields.io/github/commit-activity/t/dmuka/warehouse[GitHub commits, alt="Commits Badge"]
 image:https://img.shields.io/github/commit-activity/m/dmuka/warehouse[GitHub commits, alt="Commits Badge"]
 image:https://img.shields.io/github/last-commit/dmuka/warehouse[GitHub last commit, alt="Last Commit Badge"]
+
+== Introduction
+
+The Warehouse Application is a simple solution designed to manage warehouse operations, inventory tracking, and stock control.
+
+== Project Architecture
+
+=== Overview
+
+The solution follows a clean, layered architecture with a strong emphasis on Domain-Driven Design (DDD) principles. This approach ensures separation of concerns, maintainability, and scalability.
+
+=== Architectural Layers
+
+The application is organized into the following key layers:
+
+==== Core Layer (Warehouse.Core)
+
+The foundation of the application containing:
+
+* Base abstractions (Entity, AggregateRoot, ValueObject)
+* Domain event interfaces
+* Type-safe ID implementations
+* Common specifications
+* Result patterns for error handling
+
+==== Domain Layer (Warehouse.Domain)
+
+Contains the business domain model with:
+
+* Aggregates defining business entities and their behavior
+* Domain services implementing complex business logic
+* Repository interfaces for data access abstraction
+* Domain events for cross-boundary communication
+
+==== Application Layer (Warehouse.Application)
+
+Orchestrates the application flow by:
+
+* Implementing use cases through services and handlers
+* Managing transactions and coordinating between layers
+* Providing DTOs for data transfer between layers
+* Handling cross-cutting concerns
+
+==== Infrastructure Layer (Warehouse.Infrastructure)
+
+Provides technical capabilities:
+
+* Database access implementation (likely using Entity Framework Core)
+* Repository implementations
+* External service integrations
+* Logging, caching, and other infrastructure concerns
+
+==== Presentation Layer (Warehouse.Presentation)
+
+Handles the user interface and API endpoints:
+
+* ASP.NET Core controllers (Web API)
+* API endpoints and models
+
+== Design Patterns
+
+=== Domain-Driven Design (DDD)
+
+* *Aggregates*: Implemented through the AggregateRoot base class to enforce consistency boundaries
+* *Entities*: Domain objects with identity and lifecycle
+* *Value Objects*: Immutable objects without identity
+* *Domain Events*: For loose coupling between aggregates and services
+* *Repositories*: Abstract data access patterns
+
+=== Repository Pattern
+
+* Clean separation between domain logic and data access
+* Defined through IRepository interface in Domain layer
+* Implemented in the Infrastructure layer
+
+=== Unit of Work Pattern
+
+* Managed through IUnitOfWork interface
+* Ensures atomic operations and transaction management
+
+=== Specification Pattern
+
+* Encapsulates query logic in reusable components
+* Supports composable business rules
+
+=== CQRS (Command Query Responsibility Segregation)
+
+* Separation of read and write operations
+* Commands for state changes
+* Queries for data retrieval
+
+=== Result Pattern
+
+* Explicit success/failure return types
+* Structured error handling without exceptions
+
+== Technologies
+
+* *.NET 9.0*: Latest .NET platform
+* *ASP.NET Core*: Web framework
+* *Entity Framework Core*: (likely) ORM for data access
+* *C# 13.0*: Programming language with latest features
+
+== Getting Started
+
+=== Prerequisites
+
+* .NET 9.0 SDK
+* SQL Server (or your configured database)
+* Visual Studio 2022/Rider 2025 or newer
+
+=== Installation
+
+1. Clone the repository:
++
+[source,bash]
+----
+git clone https://github.com/dmuka/warehouse.git
+cd warehouse
+----
+
+2. Restore dependencies:
++
+[source,bash]
+----
+dotnet restore
+----
+
+3. Configure the database connection in `appsettings.json`
+
+4. Apply database migrations:
++
+[source,bash]
+----
+dotnet ef database update
+----
+
+5. Run the application:
++
+[source,bash]
+----
+dotnet run --project src/Warehouse.Presentation
+----
