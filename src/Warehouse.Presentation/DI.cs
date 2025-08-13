@@ -1,4 +1,5 @@
-﻿using Warehouse.Presentation.Infrastructure;
+﻿using System.Text.Json;
+using Warehouse.Presentation.Infrastructure;
 
 namespace Warehouse.Presentation;
 

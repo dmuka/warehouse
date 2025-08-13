@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Clients;
@@ -18,7 +19,7 @@ public class Shipment : AggregateRoot
     public ClientId ClientId { get; private set; } = null!;
     public ShipmentStatus Status { get; private set; }
     public IReadOnlyCollection<ShipmentItem> Items => _items.AsReadOnly();
-    private readonly IList<ShipmentItem> _items = [];
+    private IList<ShipmentItem> _items = [];
 
     protected Shipment() { }
 
@@ -42,18 +43,23 @@ public class Shipment : AggregateRoot
         DateTime date,
         Guid clientId,
         IList<ShipmentItem> items,
+        ShipmentStatus status = ShipmentStatus.Draft,
         Guid? shipmentId = null)
     {
         var validationResults = ValidateShipmentDetails(number);
         if (validationResults.Length != 0)
             return Result<Shipment>.ValidationFailure(ValidationError.FromResults(validationResults));
-
+        if (status == ShipmentStatus.Signed && items.Count == 0)
+            return Result.Failure<Shipment>(ShipmentErrors.EmptyShipment);
+        
         var shipment = new Shipment(
             number,
             date,
             new ClientId(clientId),
             items,
             shipmentId is null ? new ShipmentId(Guid.NewGuid()) : new ShipmentId(shipmentId.Value));
+    
+        if (status == ShipmentStatus.Signed) shipment.ChangeStatus(ShipmentStatus.Signed);
         
         shipment.AddDomainEvent(new ShipmentCreatedDomainEvent(
             shipment.Id,
@@ -65,6 +71,58 @@ public class Shipment : AggregateRoot
                 i.Id).Value).ToList()));
 
         return shipment;
+    }
+
+    public Result<Shipment> Update(
+        string number,
+        DateTime date,
+        Guid clientId,
+        IList<ShipmentItem> items,
+        ShipmentStatus status )
+    {
+        var validationResults = ValidateShipmentDetails(number);
+        if (validationResults.Length != 0)
+            return Result<Shipment>.ValidationFailure(ValidationError.FromResults(validationResults));
+        if (status == ShipmentStatus.Signed && items.Count == 0)
+            return Result.Failure<Shipment>(ShipmentErrors.EmptyShipment);
+
+        Number = number;
+        Date = date;
+        ClientId = new ClientId(clientId);
+        
+        var itemsToRemove = _items.Except(items).ToList();
+        var itemsToAdd = items.Except(_items).ToList();
+    
+        foreach (var item in itemsToRemove)
+        {
+            _items.Remove(item);
+        }
+    
+        foreach (var item in itemsToAdd)
+        {
+            _items.Add(item);
+        }
+
+        if (status == ShipmentStatus.Signed) return this;
+        
+        ChangeStatus(ShipmentStatus.Signed);
+        AddDomainEvent(new ShipmentSignedDomainEvent(
+            Id,
+            items.Select(i => ShipmentItem.Create(
+                Id,
+                i.ResourceId.Value,
+                i.UnitId.Value,
+                i.Quantity,
+                i.Id).Value).ToList()));
+
+        return this;
+    }
+    
+    public void Remove()
+    {
+        AddDomainEvent(new ShipmentRemovedDomainEvent(
+            Id,
+            Items.ToList()));
     }
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)
@@ -80,28 +138,39 @@ public class Shipment : AggregateRoot
         return Result.Success();
     }
     
+    private Result CanTransitionTo(ShipmentStatus newStatus)
+    {
+        switch (Status)
+        {
+            case ShipmentStatus.Draft:
+                if (newStatus is ShipmentStatus.Cancelled or ShipmentStatus.Signed)
+                    return Result.Success();
+                break;
+                
+            case ShipmentStatus.Signed:
+                if (newStatus == ShipmentStatus.Cancelled)
+                    return Result.Success();
+                break;
+                
+            case ShipmentStatus.Cancelled:
+                break;
+        }
+
+        return Result.Failure(ShipmentErrors.InvalidStatusTransition(Status, newStatus));
+    }
+    
     public Result ChangeStatus(ShipmentStatus newStatus)
     {
         var transitionResult = Status.CanTransitionTo(newStatus);
         if (transitionResult.IsFailure) return transitionResult;
-
-        if (newStatus == ShipmentStatus.Signed)
-        {
-            if (_items.Count == 0) return Result.Failure(ShipmentErrors.EmptyShipment);
-        }
+        
+        if (_items.Count == 0) return Result.Failure(ShipmentErrors.EmptyShipment);
 
         Status = newStatus;
         
-        return Result.Success();
-    }
-
-    public Result Cancel(string reason)
-    {
-        if (Status.IsFinal()) return Result.Failure(ShipmentErrors.AlreadyFinalized(Id, reason));
-
-        var result = ChangeStatus(ShipmentStatus.Cancelled);
+        if (newStatus == ShipmentStatus.Signed) AddDomainEvent(new ShipmentSignedDomainEvent(Id, Items.ToList()));
         
-        return result;
+        return Result.Success();
     }
 
     private static Result[] ValidateShipmentDetails(string number)

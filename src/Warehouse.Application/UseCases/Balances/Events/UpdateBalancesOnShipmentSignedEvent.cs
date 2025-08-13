@@ -13,10 +13,10 @@ public sealed class UpdateBalancesOnShipmentCreatedHandler(
     IResourceRepository resourceRepository,
     IUnitRepository unitRepository,
     IUnitOfWork unitOfWork)
-    : INotificationHandler<ShipmentCreatedDomainEvent>
+    : INotificationHandler<ShipmentSignedDomainEvent>
 {
     public async Task Handle(
-        ShipmentCreatedDomainEvent notification,
+        ShipmentSignedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -37,25 +37,12 @@ public sealed class UpdateBalancesOnShipmentCreatedHandler(
                     new ResourceId(item.ResourceId),
                     new UnitId(item.UnitId),
                     cancellationToken);
-
-                if (balance is null)
-                {
-                    var newBalanceResult = Balance.Create(
-                        new ResourceId(item.ResourceId),
-                        new UnitId(item.UnitId),
-                        item.Quantity);
-                    if (newBalanceResult.IsFailure) throw new ApplicationException(newBalanceResult.Error.Description);
-                    
-                    balance = newBalanceResult.Value;
-                    balanceRepository.Add(balance);
-                }
-                else
-                {
-                    var updateResult = balance.Decrease(item.Quantity);
-                    if (updateResult.IsFailure) throw new ApplicationException(updateResult.Error.Description);
-                    
-                    balanceRepository.Update(balance);
-                }
+                if (balance is null) throw new InvalidOperationException("Balance not found.");
+                
+                var updateResult = balance.Decrease(item.Quantity);
+                if (updateResult.IsFailure) throw new ApplicationException(updateResult.Error.Description);
+                
+                balanceRepository.Update(balance);
             }
 
             await unitOfWork.CommitAsync(cancellationToken);

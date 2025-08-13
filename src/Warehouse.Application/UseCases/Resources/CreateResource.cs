@@ -1,13 +1,13 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Resources.Dtos;
 using Warehouse.Application.UseCases.Resources.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Resources;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Application.UseCases.Resources;
 
-public record CreateResourceCommand(ResourceDto Dto) : IRequest<Result<ResourceId>>;
+public record CreateResourceCommand(ResourceRequest Request) : IRequest<Result<ResourceId>>;
 
 public sealed class CreateResourceCommandHandler(
     IResourceRepository repository,
@@ -17,11 +17,11 @@ public sealed class CreateResourceCommandHandler(
         CreateResourceCommand request, 
         CancellationToken cancellationToken)
     {
-        var specificationResult = await new ResourceNameMustBeUnique(request.Dto.ResourceName, repository)
+        var specificationResult = await new ResourceNameMustBeUnique(request.Request.ResourceName, repository)
             .IsSatisfiedAsync(cancellationToken);
         if (specificationResult.IsFailure) return Result.Failure<ResourceId>(specificationResult.Error);
 
-        var resourceCreationResult = Resource.Create(request.Dto.ResourceName, request.Dto.IsActive);
+        var resourceCreationResult = Resource.Create(request.Request.ResourceName, request.Request.IsActive);
         if (resourceCreationResult.IsFailure) return Result.Failure<ResourceId>(resourceCreationResult.Error);
         
         repository.Add(resourceCreationResult.Value);

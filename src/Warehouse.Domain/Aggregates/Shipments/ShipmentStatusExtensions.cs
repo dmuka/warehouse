@@ -10,14 +10,13 @@ public static class ShipmentStatusExtensions
         {
             // Valid transitions
             (ShipmentStatus.Draft, ShipmentStatus.Signed) => Result.Success(),
-            (ShipmentStatus.Signed, ShipmentStatus.Completed) => Result.Success(),
             
             // Cancellation paths
             (ShipmentStatus.Draft, ShipmentStatus.Cancelled) => Result.Success(),
             (ShipmentStatus.Signed, ShipmentStatus.Cancelled) => Result.Success(),
             
-            // Rejection paths
-            (_, ShipmentStatus.Rejected) => Result.Success(),
+            // Cancellation paths
+            (_, ShipmentStatus.Cancelled) => Result.Success(),
             
             // Invalid transitions
             _ => Result.Failure(ShipmentErrors.InvalidStatusTransition(current, target))
@@ -25,9 +24,7 @@ public static class ShipmentStatusExtensions
     }
 
     public static bool IsFinal(this ShipmentStatus status) =>
-        status is ShipmentStatus.Completed or 
-            ShipmentStatus.Cancelled or 
-            ShipmentStatus.Rejected;
+        status is ShipmentStatus.Cancelled;
 
     public static bool AllowsModification(this ShipmentStatus status) =>
         status is ShipmentStatus.Draft;

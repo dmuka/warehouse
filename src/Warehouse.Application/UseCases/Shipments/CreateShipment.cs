@@ -30,6 +30,7 @@ public sealed class CreateShipmentCommandHandler(
             request.ShipmentRequest.ClientId,
             request.ShipmentRequest.Items.Select(i => 
                 ShipmentItem.Create(shipmentId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
+            request.ShipmentRequest.Status,
             shipmentId);
     
         if (shipmentResult.IsFailure) return Result.Failure<ShipmentId>(shipmentResult.Error);

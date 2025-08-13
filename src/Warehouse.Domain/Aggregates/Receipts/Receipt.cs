@@ -58,6 +58,34 @@ public class Receipt : AggregateRoot
 
         return receipt;
     }
+
+    public Result<Receipt> Update(
+        string number,
+        DateTime date,
+        IList<ReceiptItem> items)
+    {
+        var validationResults = ValidateReceiptDetails(number);
+        if (validationResults.Length != 0)
+            return Result<Receipt>.ValidationFailure(ValidationError.FromResults(validationResults));
+
+        Number = number;
+        Date = date;
+        
+        var itemsToRemove = _items.Except(items).ToList();
+        var itemsToAdd = items.Except(_items).ToList();
+    
+        foreach (var item in itemsToRemove)
+        {
+            _items.Remove(item);
+        }
+    
+        foreach (var item in itemsToAdd)
+        {
+            _items.Add(item);
+        }
+
+        return this;
+    }
     
     public void Remove()
     {

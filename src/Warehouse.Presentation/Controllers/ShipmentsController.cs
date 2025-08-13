@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Shipments;
 using Warehouse.Application.UseCases.Shipments.Dtos;
+using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
 
@@ -22,16 +23,70 @@ public class ShipmentsController(IMediator mediator) : ControllerBase
 
         return result.Match(Results.Ok, CustomResults.Problem);
     }
+
+    [HttpPost("filter")]
+    [ProducesResponseType(typeof(IList<ShipmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> GetFiltered([FromBody] ShipmentFilterDto filter)
+    {
+        var query = new GetFilteredShipmentsQuery(
+            filter.DateFrom, 
+            filter.DateTo, 
+            filter.ReceiptNumber,
+            filter.ClientIds,
+            filter.ResourceIds, 
+            filter.UnitIds);
+        
+        var result = await mediator.Send(query);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
     
     [HttpPost]
     [ProducesResponseType(typeof(ShipmentRequest), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ShipmentRequest dto)
+    public async Task<IResult> Create([FromBody] ShipmentRequest request)
     {
-        var command = new CreateShipmentCommand(dto);
+        var command = new CreateShipmentCommand(request);
         
         var result = await mediator.Send(command);
 
         return result.Match(Results.Ok, CustomResults.Problem);
+    }
+    
+    [HttpGet("{id:Guid}")]
+    [ProducesResponseType(typeof(ShipmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> GetById(Guid id)
+    {
+        var command = new GetShipmentByIdQuery(id);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.Ok, CustomResults.Problem);
+    }
+    
+    [HttpDelete("delete/{id:Guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> DeleteById(Guid id)
+    {
+        var command = new RemoveShipmentByIdQuery(id);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
+    
+    [HttpPut("update")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> Update([FromBody] ShipmentRequest request)
+    {
+        var command = new UpdateShipmentCommand(request);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
     }
 }

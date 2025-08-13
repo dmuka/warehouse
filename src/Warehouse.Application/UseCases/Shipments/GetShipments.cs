@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Warehouse.Application.UseCases.Shipments.Dtos;
 using Warehouse.Core.Results;
+using Warehouse.Domain.Aggregates.Shipments;
 using Warehouse.Infrastructure.Data;
 
 namespace Warehouse.Application.UseCases.Shipments;
@@ -15,24 +16,32 @@ public sealed class GetShipmentsQueryHandler(WarehouseDbContext context)
         GetShipmentsQuery request,
         CancellationToken cancellationToken)
     {
-        var shipments = await context.Shipments.Select(shipment => new ShipmentResponse
-        {
-            Id = shipment.Id,
-            ShipmentNumber = shipment.Number,
-            ShipmentDate = shipment.Date,
-            ClientId = shipment.ClientId,
-            Items = shipment.Items.Select(item => new ShipmentItemResponse
-            {
-                Id = item.Id,
-                ShipmentId = shipment.Id,
-                ResourceId = item.ResourceId,
-                ResourceName = context.Resources.First(r => r.Id == item.ResourceId).ResourceName.Value,
-                UnitId = item.UnitId,
-                UnitName = context.Units.First(u => u.Id == item.UnitId).UnitName.Value,
-                Quantity = item.Quantity
-            }).ToList()
-        }).ToListAsync(cancellationToken);
+        var shipments = await context.Shipments.Select(shipment => new ShipmentResponse(
+            shipment.Id,
+            shipment.Number,
+            shipment.Date,
+            shipment.ClientId,
+            context.Clients.First(client => client.Id == shipment.ClientId).ClientName.Value,
+            Enum.GetName(shipment.Status) ?? string.Empty,
+            shipment.Items.Select(item => new ShipmentItemResponse(
+                item.Id,
+                shipment.Id,
+                item.ResourceId,
+                context.Resources.First(r => r.Id == item.ResourceId).ResourceName.Value,
+                item.UnitId,
+                context.Units.First(u => u.Id == item.UnitId).UnitName.Value,
+                item.Quantity)).ToList()
+            )).ToListAsync(cancellationToken);
 
+        var clientIds = shipments.Select(shipment => shipment.ClientId);
+
+        var clients = await context.Clients.Where(client => clientIds.Contains(client.Id))
+            .Select(client => new { client.Id, client.ClientName }).ToListAsync(cancellationToken);
+
+        shipments.ForEach(shipment => 
+            shipment = shipment with { ClientName = clients
+                .First(client => client.Id == shipment.ClientId).ClientName.Value });
+        
         return Result.Success<IList<ShipmentResponse>>(shipments);
     }
 }

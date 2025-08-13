@@ -32,13 +32,26 @@ public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfW
         return await query.ToListAsync(cancellationToken);
     }
 
+    public async Task<TEntity?> GetByIdAsync(
+        TypedId id,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.Set<TEntity>().AsQueryable();
+
+        if (include is not null)
+        {
+            query = include(query);
+        }
+        
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
+
     public async Task<TEntity?> GetByIdAsync(TypedId id, CancellationToken cancellationToken = default)
     {
-        var entity = await context.Set<TEntity>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        var query = context.Set<TEntity>().AsQueryable();
         
-        return entity;
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)

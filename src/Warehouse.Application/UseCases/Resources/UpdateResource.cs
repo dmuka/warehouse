@@ -1,13 +1,13 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Resources.Dtos;
 using Warehouse.Application.UseCases.Resources.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Resources;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Application.UseCases.Resources;
 
-public record UpdateResourceCommand(ResourceDto Dto) : IRequest<Result<ResourceId>>;
+public record UpdateResourceCommand(ResourceRequest Dto) : IRequest<Result<ResourceId>>;
 
 public sealed class UpdateResourceCommandHandler(
     IResourceRepository repository,

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Clients;
+using Warehouse.Application.UseCases.Clients.Dtos;
 using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -13,7 +14,7 @@ namespace Warehouse.Presentation.Controllers;
 public class ClientsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<ClientDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<ClientResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetClients()
     {
         var query = new GetClientsQuery();
@@ -26,7 +27,7 @@ public class ClientsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ClientDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ClientDto clientDto)
+    public async Task<IResult> Create([FromBody] ClientRequest clientDto)
     {
         var command = new CreateClientCommand(clientDto);
         
@@ -38,7 +39,7 @@ public class ClientsController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] ClientDto clientDto)
+    public async Task<IResult> Update([FromBody] ClientRequest clientDto)
     {
         var command = new UpdateClientCommand(clientDto);
         
@@ -48,7 +49,7 @@ public class ClientsController(IMediator mediator) : ControllerBase
     }
     
     [HttpGet("{id:Guid}")]
-    [ProducesResponseType(typeof(ClientDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ClientResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> GetById(Guid id)
     {

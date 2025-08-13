@@ -60,7 +60,7 @@ public class ShipmentRepository(WarehouseDbContext context, IUnitOfWork unitOfWo
         ShipmentId id, 
         CancellationToken cancellationToken = default)
     {
-        var shipment = await GetByIdAsync(id, cancellationToken);
+        var shipment = await GetByIdAsync(id, null, cancellationToken);
         if (shipment != null)
         {
             _context.Shipments.Remove(shipment);

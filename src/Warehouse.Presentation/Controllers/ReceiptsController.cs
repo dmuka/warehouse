@@ -53,6 +53,18 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
         return result.Match(Results.Ok, CustomResults.Problem);
     }
     
+    [HttpPut("update")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IResult> Update([FromBody] ReceiptRequest request)
+    {
+        var command = new UpdateReceiptCommand(request);
+        
+        var result = await mediator.Send(command);
+
+        return result.Match(Results.NoContent, CustomResults.Problem);
+    }
+    
     [HttpGet("{id:Guid}")]
     [ProducesResponseType(typeof(ReceiptResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,14 +1,14 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Units.Dtos;
 using Warehouse.Application.UseCases.Units.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Units;
-using Warehouse.Infrastructure.Data.DTOs;
 using Unit = Warehouse.Domain.Aggregates.Units.Unit;
 
 namespace Warehouse.Application.UseCases.Units;
 
-public record CreateUnit(UnitDto Dto) : IRequest<Result<UnitId>>;
+public record CreateUnit(UnitRequest Dto) : IRequest<Result<UnitId>>;
 
 public sealed class CreateUnitCommandHandler(
     IUnitRepository repository,

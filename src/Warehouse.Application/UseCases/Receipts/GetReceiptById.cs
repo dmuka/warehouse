@@ -17,6 +17,7 @@ public sealed class GetReceiptByIdQueryHandler(WarehouseDbContext context)
         CancellationToken cancellationToken)
     {
         var receipt = await context.Receipts
+            .Where(r => r.Id == request.Id)
             .Include(receipt => receipt.Items)
             .FirstOrDefaultAsync(receipt => receipt.Id == request.Id, cancellationToken);
         if (receipt is null) return Result.Failure<ReceiptResponse>(ReceiptErrors.NotFound(request.Id));

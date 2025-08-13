@@ -1,12 +1,12 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Clients.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Application.UseCases.Clients;
 
-public record UpdateClientCommand(ClientDto Dto) : IRequest<Result>;
+public record UpdateClientCommand(ClientRequest Dto) : IRequest<Result>;
 
 public sealed class UpdateClientCommandHandler(
     IClientRepository repository,

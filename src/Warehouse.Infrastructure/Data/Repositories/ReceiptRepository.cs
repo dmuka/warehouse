@@ -29,10 +29,7 @@ public class ReceiptRepository(WarehouseDbContext context, IUnitOfWork unitOfWor
         if (includeItems)
         {
             query = query
-                .Include(receipt => receipt.Items)
-                .ThenInclude(item => item.ResourceId)
-                .Include(receipt => receipt.Items)
-                .ThenInclude(item => item.UnitId);
+                .Include(receipt => receipt.Items);
         }
 
         var receipt = await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
@@ -60,7 +57,7 @@ public class ReceiptRepository(WarehouseDbContext context, IUnitOfWork unitOfWor
         ReceiptId id, 
         CancellationToken cancellationToken = default)
     {
-        var receipt = await GetByIdAsync(id, cancellationToken);
+        var receipt = await GetByIdAsync(id, false, cancellationToken);
         if (receipt != null)
         {
             _context.Receipts.Remove(receipt);

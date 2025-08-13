@@ -7,13 +7,13 @@ using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Application.UseCases.Balances.Events;
 
-public sealed class UpdateBalancesOnShipmentRemovedHandler(
+public sealed class UpdateBalancesOnShipmentWithdrawedHandler(
     IBalanceRepository balanceRepository,
     IUnitOfWork unitOfWork)
-    : INotificationHandler<ShipmentRemovedDomainEvent>
+    : INotificationHandler<ShipmentWithdrawedDomainEvent>
 {
     public async Task Handle(
-        ShipmentRemovedDomainEvent notification,
+        ShipmentWithdrawedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -28,7 +28,7 @@ public sealed class UpdateBalancesOnShipmentRemovedHandler(
                     cancellationToken);
                 if (balance is null) throw new InvalidOperationException("Balance not found.");
                 
-                var result = balance.Decrease(item.Quantity);
+                var result = balance.Increase(item.Quantity);
                 if (result.IsFailure) throw new InvalidOperationException(result.Error.Description);
 
                 balanceRepository.Update(balance);

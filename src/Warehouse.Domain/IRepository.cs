@@ -49,6 +49,16 @@ namespace Warehouse.Domain
         /// <param name="id">The primary key value of the entity.</param>
         /// <param name="cancellationToken"> A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <returns>Returns <see cref="Task{TResult}"/>.</returns>
+        Task<TEntity?> GetByIdAsync(TypedId id, Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// This method takes <paramref name="id"/> which is the primary key value of the entity and returns the entity
+        /// if found otherwise <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="id">The primary key value of the entity.</param>
+        /// <param name="cancellationToken"> A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>Returns <see cref="Task{TResult}"/>.</returns>
         Task<TEntity?> GetByIdAsync(TypedId id, CancellationToken cancellationToken = default);
 
         #endregion

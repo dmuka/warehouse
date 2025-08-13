@@ -1,12 +1,12 @@
 ﻿using MediatR;
+using Warehouse.Application.UseCases.Units.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Units;
-using Warehouse.Infrastructure.Data.DTOs;
 
 namespace Warehouse.Application.UseCases.Units;
 
-public record UpdateUnitCommand(UnitDto Dto) : IRequest<Result>;
+public record UpdateUnitCommand(UnitRequest Dto) : IRequest<Result>;
 
 public sealed class UpdateUnitCommandHandler(
     IUnitRepository repository,

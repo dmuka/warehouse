@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Units;
+using Warehouse.Application.UseCases.Units.Dtos;
 using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -13,7 +14,7 @@ namespace Warehouse.Presentation.Controllers;
 public class UnitsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<UnitDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<UnitResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetUnits()
     {
         var query = new GetUnitsQuery();
@@ -24,9 +25,9 @@ public class UnitsController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(UnitDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(UnitResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] UnitDto resourceDto)
+    public async Task<IResult> Create([FromBody] UnitRequest resourceDto)
     {
         var command = new CreateUnit(resourceDto);
         
@@ -38,7 +39,7 @@ public class UnitsController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] UnitDto unitDto)
+    public async Task<IResult> Update([FromBody] UnitRequest unitDto)
     {
         var command = new UpdateUnitCommand(unitDto);
         
@@ -48,7 +49,7 @@ public class UnitsController(IMediator mediator) : ControllerBase
     }
     
     [HttpGet("{id:Guid}")]
-    [ProducesResponseType(typeof(UnitDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UnitResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> GetById(Guid id)
     {
