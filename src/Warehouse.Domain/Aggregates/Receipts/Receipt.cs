@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Warehouse.Application.UseCases.Receipts.Specifications;
 using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Receipts.DomainEvents;
@@ -109,7 +110,7 @@ public class Receipt : AggregateRoot
 
     private static Result[] ValidateReceiptDetails(string number)
     {
-        Result[] results = [];
+        Result[] results = [new ReceiptNumberMustBeNotEmpty(number).IsSatisfied()];
 
         return results.Where(r => r.IsFailure).ToArray();
     }

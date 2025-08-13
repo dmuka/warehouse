@@ -10,4 +10,5 @@ public static class Codes
     public const string ResourceWithThisNameExist = "ResourceWithThisNameExist";
     public const string ResourceAlreadyArchived = "ResourceAlreadyArchived";
     public const string ResourceAlreadyActive = "ResourceAlreadyActive";
+    public const string ResourceIsInUse = "ResourceIsInUse";
 }

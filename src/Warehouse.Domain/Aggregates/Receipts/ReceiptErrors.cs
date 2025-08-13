@@ -24,4 +24,8 @@ public static class ReceiptErrors
     public static Error ReceiptAlreadyExist(string receiptNumber) => Error.Problem(
         Codes.ReceiptAlreadyExist,
         $"Receipt already exist (receipt number: {receiptNumber})");
+
+    public static Error ReceiptNumberNotValid(string receiptNumber) => Error.Problem(
+        Codes.ReceiptNumberInvalid,
+        $"Invalid receipt number (receipt number: {receiptNumber})");
 }

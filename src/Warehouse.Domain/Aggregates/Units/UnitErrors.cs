@@ -8,6 +8,10 @@ public static class UnitErrors
     public static Error NotFound(Guid unitId) => Error.NotFound(
         Codes.NotFound,
         $"The unit with id = '{unitId}' was not found");
+    
+    public static Error UnitIsInUse(Guid unitId) => Error.Problem(
+        Codes.UnitIsInUse,
+        $"The unit with id = '{unitId}' is in use");
 
     public static readonly Error EmptyUnitName = Error.Problem(
         Codes.EmptyUnitName,

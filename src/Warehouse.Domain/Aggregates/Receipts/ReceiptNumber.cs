@@ -1,4 +1,5 @@
-﻿using Warehouse.Core;
+﻿using Warehouse.Application.UseCases.Receipts.Specifications;
+using Warehouse.Core;
 using Warehouse.Core.Results;
 using Warehouse.Domain.Aggregates.Receipts.Specifications;
 
@@ -13,7 +14,7 @@ public class ReceiptNumber : ValueObject
 
     public static Result<ReceiptNumber> Create(string name)
     {
-        var validation = new ReceiptNumberMustBeValid(name).IsSatisfied();
+        var validation = new ReceiptNumberMustBeNotEmpty(name).IsSatisfied();
         
         return validation.IsFailure 
             ? Result<ReceiptNumber>.ValidationFailure(validation.Error) 

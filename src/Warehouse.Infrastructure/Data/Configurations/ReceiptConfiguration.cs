@@ -13,10 +13,5 @@ internal class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
         builder.HasKey(receipt => receipt.Id);
         builder.Property(receipt => receipt.Id)
             .HasConversion(id => id.Value, value => new ReceiptId(value));
-        
-        builder.HasMany(receipt => receipt.Items)
-            .WithOne()
-            .HasForeignKey(item => item.ReceiptId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

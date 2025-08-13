@@ -102,27 +102,16 @@ public class Shipment : AggregateRoot
         {
             _items.Add(item);
         }
-
-        if (status == ShipmentStatus.Signed) return this;
         
-        ChangeStatus(ShipmentStatus.Signed);
-        AddDomainEvent(new ShipmentSignedDomainEvent(
-            Id,
-            items.Select(i => ShipmentItem.Create(
-                Id,
-                i.ResourceId.Value,
-                i.UnitId.Value,
-                i.Quantity,
-                i.Id).Value).ToList()));
+        if (status != Status) ChangeStatus(status);
 
         return this;
     }
     
     public void Remove()
     {
-        AddDomainEvent(new ShipmentRemovedDomainEvent(
-            Id,
-            Items.ToList()));
+        if (Status != ShipmentStatus.Draft)
+            AddDomainEvent(new ShipmentRemovedDomainEvent(Id, Items.ToList()));
     }
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)
@@ -148,7 +137,7 @@ public class Shipment : AggregateRoot
                 break;
                 
             case ShipmentStatus.Signed:
-                if (newStatus == ShipmentStatus.Cancelled)
+                if (newStatus is ShipmentStatus.Cancelled or ShipmentStatus.Draft)
                     return Result.Success();
                 break;
                 
@@ -161,14 +150,27 @@ public class Shipment : AggregateRoot
     
     public Result ChangeStatus(ShipmentStatus newStatus)
     {
-        var transitionResult = Status.CanTransitionTo(newStatus);
+        var transitionResult = CanTransitionTo(newStatus);
         if (transitionResult.IsFailure) return transitionResult;
         
         if (_items.Count == 0) return Result.Failure(ShipmentErrors.EmptyShipment);
+        switch (newStatus)
+        {
+            case ShipmentStatus.Draft:
+                AddDomainEvent(new ShipmentWithdrawedDomainEvent(Id, Items.ToList()));
+                break;
+            case ShipmentStatus.Signed:
+                AddDomainEvent(new ShipmentSignedDomainEvent(Id, Items.ToList()));
+                break;
+            case ShipmentStatus.Cancelled:
+                AddDomainEvent(new ShipmentRemovedDomainEvent(Id, Items.ToList()));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(newStatus), $"Unknown status {newStatus}");
+        }
 
         Status = newStatus;
-        
-        if (newStatus == ShipmentStatus.Signed) AddDomainEvent(new ShipmentSignedDomainEvent(Id, Items.ToList()));
+ 
         
         return Result.Success();
     }

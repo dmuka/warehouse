@@ -40,9 +40,9 @@ public class BalancesController(IMediator mediator) : ControllerBase
     [HttpPost("available")]
     [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> GetFiltered([FromBody] AvailableBalanceRequest dto)
+    public async Task<IResult> GetFiltered([FromBody] AvailableBalanceRequest request)
     {
-        var query = new GetAvailableByResourceAndUnitQuery(dto.ResourceId, dto.UnitId);
+        var query = new GetAvailableByResourceAndUnitQuery(request.ResourceId, request.UnitId);
         
         var result = await mediator.Send(query);
 
@@ -64,9 +64,9 @@ public class BalancesController(IMediator mediator) : ControllerBase
     [HttpPatch]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> UpdateBalance(UpdateBalanceDto dto)
+    public async Task<IResult> UpdateBalance(UpdateBalanceDto request)
     {
-        var command = new UpdateBalanceCommand(dto.ResourceId, dto.UnitId, dto.Quantity);
+        var command = new UpdateBalanceCommand(request.ResourceId, request.UnitId, request.Quantity);
         
         var result = await mediator.Send(command);
 

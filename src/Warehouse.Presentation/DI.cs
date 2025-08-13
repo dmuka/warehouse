@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Warehouse.Presentation.Infrastructure;
 
 namespace Warehouse.Presentation;
@@ -13,7 +14,15 @@ public static class DI
             .AddSwaggerGen()
             .AddExceptionHandler<GlobalExceptionHandler>()
             .AddProblemDetails()
-            .AddControllers();
+            .AddControllers()
+            .AddJsonOptions(options => 
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.JsonSerializerOptions.AllowOutOfOrderMetadataProperties = true;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            });
 
         return services;
     }

@@ -20,14 +20,14 @@ public sealed class UpdateReceiptCommandHandler(
     {
         await unitOfWork.BeginTransactionAsync(cancellationToken);
         
-        var receipt = await receiptRepository.GetByIdAsync(new ReceiptId(request.ReceiptRequest.Id), true, cancellationToken);
-        if (receipt is null) return Result.Failure(ReceiptErrors.NotFound(request.ReceiptRequest.Id));
+        var receipt = await receiptRepository.GetByIdAsync(new ReceiptId(Guid.Parse(request.ReceiptRequest.Id)), true, cancellationToken);
+        if (receipt is null) return Result.Failure(ReceiptErrors.NotFound(Guid.Parse(request.ReceiptRequest.Id)));
 
         receipt.Update(
             request.ReceiptRequest.ReceiptNumber, 
             request.ReceiptRequest.ReceiptDate,
             request.ReceiptRequest.Items.Select(i => 
-                ReceiptItem.Create(receipt.Id, i.ResourceId, i.UnitId, i.Quantity).Value).ToList());
+                ReceiptItem.Create(receipt.Id, Guid.Parse(i.ResourceId), Guid.Parse(i.UnitId), i.Quantity).Value).ToList());
         
         try
         {

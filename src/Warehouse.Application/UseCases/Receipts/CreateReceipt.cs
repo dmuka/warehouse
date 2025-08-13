@@ -7,7 +7,7 @@ using Warehouse.Domain.Aggregates.Receipts;
 
 namespace Warehouse.Application.UseCases.Receipts;
 
-public record CreateReceiptCommand(ReceiptRequest ReceiptRequest) : IRequest<Result<ReceiptId>>;
+public record CreateReceiptCommand(ReceiptCreateRequest ReceiptRequest) : IRequest<Result<ReceiptId>>;
 
 public sealed class CreateReceiptCommandHandler(
     IReceiptRepository receiptRepository,
@@ -26,8 +26,10 @@ public sealed class CreateReceiptCommandHandler(
         var receiptResult = Receipt.Create(
             request.ReceiptRequest.ReceiptNumber, 
             request.ReceiptRequest.ReceiptDate,
-            request.ReceiptRequest.Items.Select(i => 
-                ReceiptItem.Create(receiptId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
+            request.ReceiptRequest.Items.Count == 0 
+                ? [] 
+                : request.ReceiptRequest.Items.Select(i =>
+                    ReceiptItem.Create(receiptId, Guid.Parse(i.ResourceId), Guid.Parse(i.UnitId), i.Quantity).Value).ToList(),
             receiptId);
     
         if (receiptResult.IsFailure) return Result.Failure<ReceiptId>(receiptResult.Error);

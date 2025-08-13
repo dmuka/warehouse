@@ -1,9 +1,9 @@
 ﻿namespace Warehouse.Application.UseCases.Receipts.Dtos;
 
 public sealed record ReceiptItemRequest(
-    Guid ResourceId,
+    string ResourceId,
     string ResourceName,
-    Guid UnitId,
+    string UnitId,
     string UnitName,
     decimal Quantity) : IComparable<ReceiptItemRequest>
 {

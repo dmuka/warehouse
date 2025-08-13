@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Units;
 using Warehouse.Application.UseCases.Units.Dtos;
-using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
 
@@ -27,9 +26,9 @@ public class UnitsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(UnitResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] UnitRequest resourceDto)
+    public async Task<IResult> Create([FromBody] UnitRequest request)
     {
-        var command = new CreateUnit(resourceDto);
+        var command = new CreateUnit(request);
         
         var result = await mediator.Send(command);
 
@@ -39,9 +38,9 @@ public class UnitsController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] UnitRequest unitDto)
+    public async Task<IResult> Update([FromBody] UnitRequest request)
     {
-        var command = new UpdateUnitCommand(unitDto);
+        var command = new UpdateUnitCommand(request);
         
         var result = await mediator.Send(command);
 

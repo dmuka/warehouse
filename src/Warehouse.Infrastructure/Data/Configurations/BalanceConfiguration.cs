@@ -20,10 +20,22 @@ internal class BalanceConfiguration : IEntityTypeConfiguration<Balance>
         builder.Property(r => r.UnitId)
             .IsRequired()
             .HasConversion(id => id.Value, value => new UnitId(value));
+    
+        builder.HasOne<Unit>() 
+            .WithMany()            
+            .HasForeignKey(u => u.UnitId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
         
         builder.Property(r => r.ResourceId)
             .IsRequired()
             .HasConversion(id => id.Value, value => new ResourceId(value));
+    
+        builder.HasOne<Resource>() 
+            .WithMany()            
+            .HasForeignKey(r => r.ResourceId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
         
         builder.Property(b => b.Quantity)
             .HasPrecision(8, 2);

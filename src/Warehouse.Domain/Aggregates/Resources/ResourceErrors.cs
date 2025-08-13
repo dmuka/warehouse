@@ -8,6 +8,10 @@ public static class ResourceErrors
     public static Error NotFound(Guid resourceId) => Error.NotFound(
         Codes.NotFound, 
         $"The resource with the id = '{resourceId}' was not found.");
+    
+    public static Error ResourceIsInUse(Guid resourceId) => Error.Problem(
+        Codes.ResourceIsInUse, 
+        $"The resource with the id = '{resourceId}' is in use.");
 
     public static readonly Error EmptyResourceName = Error.Problem(
         Codes.EmptyResourceName,

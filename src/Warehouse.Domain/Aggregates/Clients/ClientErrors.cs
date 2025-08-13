@@ -8,6 +8,10 @@ public static class ClientErrors
     public static Error NotFound(Guid clientId) => Error.NotFound(
         Codes.NotFound,
         $"Client with id '{clientId}' not found");
+    
+    public static Error ClientIsInUse(Guid clientId) => Error.Problem(
+        Codes.ClientIsInUse,
+        $"Client with id '{clientId}' is in use");
 
     public static readonly Error EmptyClientName = Error.Problem(
         Codes.EmptyClientName,

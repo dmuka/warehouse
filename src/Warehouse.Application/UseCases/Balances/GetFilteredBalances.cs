@@ -20,7 +20,9 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
         var sql = """
                            select
                            Balances.Id,
+                           Resources.Id as ResourceId,
                            Resources.ResourceName,
+                           Units.Id as UnitId,
                            Units.UnitName,
                            Balances.Quantity
                            from Balances
@@ -43,7 +45,7 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
         
         var dtos = await balanceRepository.GetFromRawSqlAsync(sql, null, cancellationToken: cancellationToken);
 
-        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceName, dto.UnitName, dto.Quantity)).ToList();
+        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceId, dto.ResourceName, dto.UnitId, dto.UnitName, dto.Quantity)).ToList();
         
         return Result.Success<IList<BalanceResponse>>(response);
     }

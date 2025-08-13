@@ -45,7 +45,7 @@ public class ShipmentsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ShipmentRequest), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ShipmentRequest request)
+    public async Task<IResult> Create(ShipmentCreateRequest request)
     {
         var command = new CreateShipmentCommand(request);
         
@@ -81,9 +81,9 @@ public class ShipmentsController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] ShipmentRequest request)
+    public async Task<IResult> Update(ShipmentRequest shipmentRequest)
     {
-        var command = new UpdateShipmentCommand(request);
+        var command = new UpdateShipmentCommand(shipmentRequest);
         
         var result = await mediator.Send(command);
 

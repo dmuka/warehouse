@@ -26,9 +26,9 @@ public class ResourcesController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ResourceResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ResourceRequest resourceDto)
+    public async Task<IResult> Create([FromBody] ResourceRequest request)
     {
-        var command = new CreateResourceCommand(resourceDto);
+        var command = new CreateResourceCommand(request);
         
         var result = await mediator.Send(command);
 
@@ -86,9 +86,9 @@ public class ResourcesController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] ResourceRequest resourceDto)
+    public async Task<IResult> Update([FromBody] ResourceRequest request)
     {
-        var command = new UpdateResourceCommand(resourceDto);
+        var command = new UpdateResourceCommand(request);
         
         var result = await mediator.Send(command);
 

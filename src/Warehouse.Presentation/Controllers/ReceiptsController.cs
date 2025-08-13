@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Receipts;
 using Warehouse.Application.UseCases.Receipts.Dtos;
+using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -42,9 +43,9 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(ReceiptRequest), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ReceiptId), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ReceiptRequest request)
+    public async Task<IResult> Create([FromBody] ReceiptCreateRequest request)
     {
         var command = new CreateReceiptCommand(request);
         

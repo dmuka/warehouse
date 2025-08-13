@@ -1,7 +1,6 @@
 ﻿namespace Warehouse.Application.UseCases.Receipts.Dtos;
 
-public sealed record ReceiptRequest(
-    string Id,
+public sealed record ReceiptCreateRequest(
     string ReceiptNumber,
     DateTime ReceiptDate,
     IList<ReceiptItemRequest> Items) : IComparable<ReceiptRequest>

@@ -15,20 +15,23 @@ public sealed class GetBalancesQueryHandler(
         GetBalancesQuery request,
         CancellationToken cancellationToken)
     {
-        const string sql = """
-                           select
-                           Balances.Id,
-                           Resources.ResourceName,
-                           Units.UnitName,
-                           Balances.Quantity
-                           from Balances
-                               inner join Resources on Balances.ResourceId = Resources.Id
-                               inner join Units on Balances.UnitId = Units.Id
-                           where Resources.IsActive = 1 and Units.IsActive = 1
-                           """;
+        var sql = """
+                  select
+                  Balances.Id,
+                  Resources.Id as ResourceId,
+                  Resources.ResourceName,
+                  Units.Id as UnitId,
+                  Units.UnitName,
+                  Balances.Quantity
+                  from Balances
+                      inner join Resources on Balances.ResourceId = Resources.Id
+                      inner join Units on Balances.UnitId = Units.Id
+                  where Resources.IsActive = 1 and Units.IsActive = 1
+                  """;
+        
         var dtos = await balanceRepository.GetFromRawSqlAsync(sql, null, cancellationToken: cancellationToken);
 
-        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceName, dto.UnitName, dto.Quantity)).ToList();
+        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceId, dto.ResourceName, dto.UnitId, dto.UnitName, dto.Quantity)).ToList();
 
         return Result.Success<IList<BalanceResponse>>(response);
     }

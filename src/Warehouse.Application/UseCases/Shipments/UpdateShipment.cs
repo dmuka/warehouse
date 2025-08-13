@@ -4,6 +4,7 @@ using Warehouse.Application.UseCases.Shipments.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Shipments;
+using Warehouse.Domain.Aggregates.Shipments.Constants;
 
 namespace Warehouse.Application.UseCases.Shipments;
 
@@ -28,12 +29,18 @@ public sealed class UpdateShipmentCommandHandler(
             if (shipment is null) return Result.Failure(ShipmentErrors.NotFound(request.ShipmentRequest.Id));
             
             var updateResult = shipment.Update(
-                request.ShipmentRequest.ShipmentNumber, 
+                request.ShipmentRequest.ShipmentNumber ?? "", 
                 request.ShipmentRequest.ShipmentDate,
                 request.ShipmentRequest.ClientId,
                 request.ShipmentRequest.Items.Select(i => 
-                    ShipmentItem.Create(shipment.Id, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
-                request.ShipmentRequest.Status);
+                    ShipmentItem.Create(shipment.Id, i.ResourceId, i.UnitId, i.Quantity).Value).ToList() ?? [],
+                request.ShipmentRequest.Status switch
+                {
+                    ShipmentStatuses.Draft => ShipmentStatus.Draft,
+                    ShipmentStatuses.Signed => ShipmentStatus.Signed,
+                    ShipmentStatuses.Cancelled => ShipmentStatus.Cancelled,
+                    _ => ShipmentStatus.Draft
+                });
             
             if (updateResult.IsFailure) return Result.Failure(updateResult.Error);
         

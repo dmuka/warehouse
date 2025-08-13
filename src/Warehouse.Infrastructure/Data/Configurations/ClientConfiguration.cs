@@ -18,7 +18,6 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(client => client.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
-
         
         builder.ComplexProperty(resource => resource.ClientName, b =>
         {

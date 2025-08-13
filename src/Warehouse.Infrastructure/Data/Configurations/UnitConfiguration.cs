@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Warehouse.Domain.Aggregates.Shipments;
 using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Infrastructure.Data.Configurations;

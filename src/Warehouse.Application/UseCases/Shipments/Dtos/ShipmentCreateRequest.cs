@@ -1,11 +1,9 @@
 ﻿namespace Warehouse.Application.UseCases.Shipments.Dtos;
 
-public sealed record ShipmentRequest(
-    Guid Id,
-    string ShipmentNumber,
+public sealed record ShipmentCreateRequest(
+    string? ShipmentNumber,
     DateTime ShipmentDate,
     Guid ClientId,
-    string ClientName,
     string Status,
     IList<ShipmentItemRequest> Items) : IComparable<ShipmentRequest>
 {
