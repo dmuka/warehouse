@@ -28,4 +28,8 @@ public static class ReceiptErrors
     public static Error ReceiptNumberNotValid(string receiptNumber) => Error.Problem(
         Codes.ReceiptNumberInvalid,
         $"Invalid receipt number (receipt number: {receiptNumber})");
+
+    public static Error InsufficientStock(Guid receiptId) => Error.Problem(
+        Codes.InsufficientStock,
+        $"You don't have enough items to remove receipt id: {receiptId}.");
 }

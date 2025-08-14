@@ -8,4 +8,5 @@ public static class Codes
     public const string ReceiptItemAlreadyExist = "ReceiptItemAlreadyExist";
     public const string ReceiptAlreadyExist = "ReceiptAlreadyExist";
     public const string ReceiptNumberInvalid = "ReceiptNumberInvalid";
+    public const string InsufficientStock = "InsufficientStock";
 }
