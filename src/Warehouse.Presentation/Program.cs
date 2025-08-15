@@ -1,3 +1,4 @@
+using Serilog;
 using Warehouse.Application;
 using Warehouse.Infrastructure;
 using Warehouse.Presentation;
@@ -5,6 +6,8 @@ using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure.DbCreate;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services
     .AddApplication()
