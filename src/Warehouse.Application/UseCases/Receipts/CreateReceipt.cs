@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Application.UseCases.Receipts.Specifications;
 using Warehouse.Core.Results;
@@ -11,6 +12,9 @@ public record CreateReceiptCommand(ReceiptCreateRequest ReceiptRequest) : IReque
 
 public sealed class CreateReceiptCommandHandler(
     IReceiptRepository receiptRepository,
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateReceiptCommand, Result<ReceiptId>>
 {
     public async Task<Result<ReceiptId>> Handle(
@@ -22,6 +26,8 @@ public sealed class CreateReceiptCommandHandler(
         if (specificationResult.IsFailure) 
             return Result.Failure<ReceiptId>(specificationResult.Error);
 
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+
         var receiptId = Guid.CreateVersion7();
         var receiptResult = Receipt.Create(
             request.ReceiptRequest.ReceiptNumber, 
@@ -29,17 +35,16 @@ public sealed class CreateReceiptCommandHandler(
             request.ReceiptRequest.Items.Count == 0 
                 ? [] 
                 : request.ReceiptRequest.Items.Select(i =>
-                    ReceiptItem.Create(receiptId, Guid.Parse(i.ResourceId), Guid.Parse(i.UnitId), i.Quantity).Value).ToList(),
+                    ReceiptItem.Create(receiptId, i.ResourceId, i.UnitId, i.Quantity).Value).ToList(),
             receiptId);
     
         if (receiptResult.IsFailure) return Result.Failure<ReceiptId>(receiptResult.Error);
-
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
         
         try
         {
-            receiptRepository.Add(receiptResult.Value);
+            context.Receipts.Add(receiptResult.Value);
             await unitOfWork.CommitAsync(cancellationToken);
+            cache.Remove(keyGenerator.ForMethod<Receipt>(nameof(GetReceiptsQueryHandler)));
             
             return Result.Success(receiptResult.Value.Id);
         }

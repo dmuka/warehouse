@@ -1,7 +1,6 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Receipts.Dtos;
-using Warehouse.Application.UseCases.Receipts.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
@@ -12,6 +11,8 @@ public record UpdateReceiptCommand(ReceiptRequest ReceiptRequest) : IRequest<Res
 
 public sealed class UpdateReceiptCommandHandler(
     IReceiptRepository receiptRepository,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateReceiptCommand, Result>
 {
     public async Task<Result> Handle(
@@ -20,19 +21,21 @@ public sealed class UpdateReceiptCommandHandler(
     {
         await unitOfWork.BeginTransactionAsync(cancellationToken);
         
-        var receipt = await receiptRepository.GetByIdAsync(new ReceiptId(Guid.Parse(request.ReceiptRequest.Id)), true, cancellationToken);
-        if (receipt is null) return Result.Failure(ReceiptErrors.NotFound(Guid.Parse(request.ReceiptRequest.Id)));
+        var receipt = await receiptRepository.GetByIdAsync(new ReceiptId(request.ReceiptRequest.Id), true, cancellationToken);
+        if (receipt is null) return Result.Failure(ReceiptErrors.NotFound(request.ReceiptRequest.Id));
 
         receipt.Update(
             request.ReceiptRequest.ReceiptNumber, 
             request.ReceiptRequest.ReceiptDate,
             request.ReceiptRequest.Items.Select(i => 
-                ReceiptItem.Create(receipt.Id, Guid.Parse(i.ResourceId), Guid.Parse(i.UnitId), i.Quantity).Value).ToList());
+                ReceiptItem.Create(receipt.Id, i.ResourceId, i.UnitId, i.Quantity, i.Id).Value).ToList());
         
         try
         {
             receiptRepository.Update(receipt);
             await unitOfWork.CommitAsync(cancellationToken);
+            cache.Remove(keyGenerator.ForMethod<Receipt>(nameof(GetReceiptsQueryHandler)));
+            cache.RemoveAllForEntity<Receipt>(receipt.Id);
             
             return Result.Success();
         }

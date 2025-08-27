@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Core.Results;
-using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Domain.Aggregates.Resources;
 using Warehouse.Domain.Aggregates.Units;
@@ -15,7 +15,8 @@ public record AddReceiptItemCommand(
 
 public sealed class AddReceiptItemCommandHandler(
     IReceiptRepository receiptRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<AddReceiptItemCommand, Result>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<AddReceiptItemCommand, Result>
 {
     public async Task<Result> Handle(
         AddReceiptItemCommand request,
@@ -37,7 +38,9 @@ public sealed class AddReceiptItemCommandHandler(
         if (result.IsFailure) return result;
 
         receiptRepository.Update(receipt);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await receiptRepository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Resource>(nameof(GetReceiptsQueryHandler)));
+        cache.RemoveAllForEntity<Receipt>(receipt.Id);
 
         return Result.Success();
     }

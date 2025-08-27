@@ -1,7 +1,7 @@
 ﻿namespace Warehouse.Application.UseCases.Receipts.Dtos;
 
 public sealed record ReceiptRequest(
-    string Id,
+    Guid Id,
     string ReceiptNumber,
     DateTime ReceiptDate,
     IList<ReceiptItemRequest> Items) : IComparable<ReceiptRequest>

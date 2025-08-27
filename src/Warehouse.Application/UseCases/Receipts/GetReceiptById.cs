@@ -1,25 +1,32 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Core.Results;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
-using Warehouse.Infrastructure.Data;
 
 namespace Warehouse.Application.UseCases.Receipts;
 
 public record GetReceiptByIdQuery(Guid Id) : IRequest<Result<ReceiptResponse>>;
 
-public sealed class GetReceiptByIdQueryHandler(WarehouseDbContext context) 
-    : IRequestHandler<GetReceiptByIdQuery, Result<ReceiptResponse>>
+public sealed class GetReceiptByIdQueryHandler(
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<GetReceiptByIdQuery, Result<ReceiptResponse>>
 {
     public async Task<Result<ReceiptResponse>> Handle(
         GetReceiptByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var receipt = await context.Receipts
-            .Where(r => r.Id == request.Id)
-            .Include(receipt => receipt.Items)
-            .FirstOrDefaultAsync(receipt => receipt.Id == request.Id, cancellationToken);
+        var id = new ReceiptId(request.Id);
+        var cacheKey = keyGenerator.ForEntity<Receipt>(id);
+        
+        var receipt = await cache.GetOrCreateAsync(cacheKey, async () =>
+            await context.Receipts.AsNoTracking()
+                .Where(r => r.Id == request.Id)
+                .Include(receipt => receipt.Items)
+                .FirstOrDefaultAsync(receipt => receipt.Id == request.Id, cancellationToken));
         if (receipt is null) return Result.Failure<ReceiptResponse>(ReceiptErrors.NotFound(request.Id));
         
         var response = new ReceiptResponse

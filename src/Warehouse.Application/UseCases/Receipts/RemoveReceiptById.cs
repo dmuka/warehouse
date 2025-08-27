@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Receipts.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
-using Warehouse.Domain.Aggregates.Balances;
 using Warehouse.Domain.Aggregates.Receipts;
 
 namespace Warehouse.Application.UseCases.Receipts;
@@ -11,40 +11,42 @@ namespace Warehouse.Application.UseCases.Receipts;
 public record RemoveReceiptByIdQuery(Guid Id) : IRequest<Result>;
 
 public sealed class RemoveReceiptByIdQueryHandler(
-    IReceiptRepository receiptRepository, 
-    IBalanceRepository balanceRepository,
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator,
     IUnitOfWork unitOfWork) 
     : IRequestHandler<RemoveReceiptByIdQuery, Result>
 {
     public async Task<Result> Handle(
         RemoveReceiptByIdQuery request,
         CancellationToken cancellationToken)
-    {
-        var receipt = await receiptRepository
-                .GetQueryable()
-                .Include(receipt => receipt.Items)
-                .FirstOrDefaultAsync(receipt => receipt.Id == new ReceiptId(request.Id), cancellationToken);
-        if (receipt is null) return Result.Failure<ReceiptResponse>(ReceiptErrors.NotFound(request.Id));
-
-        var tasks = receipt.Items.Select(async item =>
-        {
-            var balance = await balanceRepository.GetByResourceAndUnitAsync(item.ResourceId, item.UnitId, cancellationToken);
-            
-            return balance?.Quantity > item.Quantity;
-        });
-
-        var results = await Task.WhenAll(tasks);
-        var canRemoveReceipt = results.All(result => result);
-        if (!canRemoveReceipt) return Result.Failure<ReceiptResponse>(ReceiptErrors.InsufficientStock(request.Id));
-
+    {        
         await unitOfWork.BeginTransactionAsync(cancellationToken);
-        
-        receipt.Remove();
 
         try
         {
-            receiptRepository.Delete(receipt);
+            var receipt = await context.Receipts.AsQueryable()
+                .Include(receipt => receipt.Items)
+                .FirstOrDefaultAsync(receipt => receipt.Id == new ReceiptId(request.Id), cancellationToken);
+            if (receipt is null) return Result.Failure<ReceiptResponse>(ReceiptErrors.NotFound(request.Id));
+            
+            foreach (var item in receipt.Items)
+            {
+                var balance = await context.Balances.AsQueryable()
+                    .FirstOrDefaultAsync(balance => balance.ResourceId == item.ResourceId && balance.UnitId == item.UnitId, cancellationToken);
+
+                if (balance != null && balance.Quantity >= item.Quantity) continue;
+                
+                await unitOfWork.RollbackAsync(cancellationToken);
+                
+                return Result.Failure(ReceiptErrors.InsufficientStock(request.Id));
+            }
+        
+            receipt.Remove();
+            context.Receipts.Remove(receipt);
             await unitOfWork.CommitAsync(cancellationToken);
+            cache.Remove(keyGenerator.ForMethod<Receipt>(nameof(GetReceiptsQueryHandler)));
+            cache.RemoveAllForEntity<Receipt>(receipt.Id);
             
             return Result.Success();
         }
