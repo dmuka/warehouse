@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Serilog;
 using Warehouse.Application;
 using Warehouse.Infrastructure;
@@ -16,7 +17,6 @@ builder.Services
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage()
@@ -25,14 +25,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerWithUi();
 
     app.ApplyMigrations();
-    app.Use(async (context, next) => {
-        context.Request.EnableBuffering();
-        var reader = new StreamReader(context.Request.Body);
-        var body = await reader.ReadToEndAsync();
-        Console.WriteLine($"Request body: {body}");
-        context.Request.Body.Position = 0;
-        await next();
-    });
 }
 else
 {
@@ -43,7 +35,7 @@ else
 
 app.UseCors("AllowWarehouseClientApp");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRouting();
 

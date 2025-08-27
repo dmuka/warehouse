@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Warehouse.Core\Warehouse.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    </ItemGroup>
+
 </Project>

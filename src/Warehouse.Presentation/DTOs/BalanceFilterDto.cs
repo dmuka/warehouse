@@ -2,6 +2,6 @@
 
 public class BalanceFilterDto
 {
-    public List<Guid> ResourceNames { get; set; } = [];
-    public List<Guid> UnitNames { get; set; } = [];
+    public List<Guid> ResourceIds { get; set; } = [];
+    public List<Guid> UnitIds { get; set; } = [];
 }

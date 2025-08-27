@@ -8,6 +8,7 @@ namespace Warehouse.Domain
     /// </summary>
     public interface IRepository<TEntity> where TEntity : Entity
     {
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         /// <summary>
         /// Gets <see cref="IQueryable{T}"/> of the entity.
         /// </summary>
@@ -35,7 +36,15 @@ namespace Warehouse.Domain
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation, with a result of <see cref="IList{TEntity}"/> containing all entities.</returns>
-        Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default, Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null);
+        Task<IList<TEntity>> GetListAsync(Func<IQueryable<TEntity>, IQueryable<TEntity>> include, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all entities of type <typeparamref name="TEntity"/> from the data source.
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation, with a result of <see cref="IList{TEntity}"/> containing all entities.</returns>
+        Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default);
 
         #endregion
 

@@ -45,7 +45,7 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ReceiptId), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Create([FromBody] ReceiptCreateRequest request)
+    public async Task<IResult> Create(ReceiptCreateRequest request)
     {
         var command = new CreateReceiptCommand(request);
         
@@ -57,7 +57,7 @@ public class ReceiptsController(IMediator mediator) : ControllerBase
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> Update([FromBody] ReceiptRequest request)
+    public async Task<IResult> Update(ReceiptRequest request)
     {
         var command = new UpdateReceiptCommand(request);
         

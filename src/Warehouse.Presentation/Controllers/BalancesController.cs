@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Warehouse.Application.UseCases.Balances;
 using Warehouse.Application.UseCases.Balances.Dtos;
-using Warehouse.Infrastructure.Data.DTOs;
 using Warehouse.Presentation.DTOs;
 using Warehouse.Presentation.Extensions;
 using Warehouse.Presentation.Infrastructure;
@@ -30,7 +29,7 @@ public class BalancesController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IResult> GetFiltered([FromBody] BalanceFilterDto filter)
     {
-        var query = new GetFilteredBalancesQuery(filter.ResourceNames, filter.UnitNames);
+        var query = new GetFilteredBalancesQuery(filter.ResourceIds, filter.UnitIds);
         
         var result = await mediator.Send(query);
 
@@ -40,7 +39,8 @@ public class BalancesController(IMediator mediator) : ControllerBase
     [HttpPost("available")]
     [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IResult> GetFiltered([FromBody] AvailableBalanceRequest request)
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IResult> GetAvailable([FromBody] AvailableBalanceRequest request)
     {
         var query = new GetAvailableByResourceAndUnitQuery(request.ResourceId, request.UnitId);
         
@@ -50,7 +50,7 @@ public class BalancesController(IMediator mediator) : ControllerBase
     }
     
     [HttpGet("{resourceId:Guid}/{unitId:Guid}")]
-    [ProducesResponseType(typeof(BalanceDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BalanceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> GetBalance(Guid resourceId, Guid unitId)
     {
