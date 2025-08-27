@@ -5,9 +5,14 @@ using Warehouse.Domain;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfWork) : IRepository<TEntity>
+public class Repository<TEntity>(WarehouseDbContext context) : IRepository<TEntity>
     where TEntity : Entity
 {
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return context.SaveChangesAsync(cancellationToken);
+    }
+
     public IQueryable<TEntity> GetQueryable()
     {
         return context.Set<TEntity>().AsQueryable();
@@ -19,8 +24,8 @@ public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfW
     }
 
     public async Task<IList<TEntity>> GetListAsync(
-        CancellationToken cancellationToken = default,
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include,
+        CancellationToken cancellationToken = default)
     {
         var query = context.Set<TEntity>().AsNoTracking();
     
@@ -30,6 +35,11 @@ public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfW
         }
     
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<IList<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Set<TEntity>().AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public async Task<TEntity?> GetByIdAsync(
@@ -51,7 +61,7 @@ public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfW
     {
         var query = context.Set<TEntity>().AsQueryable();
         
-        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        return await query.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)
@@ -82,19 +92,24 @@ public class Repository<TEntity>(WarehouseDbContext context, IUnitOfWork unitOfW
     public void Add(TEntity entity)
     {
         context.Set<TEntity>().Add(entity);
-        unitOfWork.TrackDomainEvents(entity);
     }
 
     public void Update(TEntity entity)
     {
         context.Set<TEntity>().Update(entity);
-        unitOfWork.TrackDomainEvents(entity);
     }
 
     public void Delete(TEntity entity)
     {
-        context.Set<TEntity>().Remove(entity);
-        unitOfWork.TrackDomainEvents(entity);
+        try
+        {
+            context.Set<TEntity>().Remove(entity);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<IList<TEntity>> GetEntitiesByCondition(Expression<Func<TEntity, bool>> condition, CancellationToken cancellationToken = default)

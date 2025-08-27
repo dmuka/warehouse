@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
 
 namespace Warehouse.Infrastructure.Data.Repositories;
 
-public class ReceiptRepository(WarehouseDbContext context, IUnitOfWork unitOfWork) 
-    : Repository<Receipt>(context, unitOfWork), IReceiptRepository 
+public class ReceiptRepository(WarehouseDbContext context) 
+    : Repository<Receipt>(context), IReceiptRepository 
 {
     private readonly WarehouseDbContext _context = context;
     
@@ -32,7 +31,7 @@ public class ReceiptRepository(WarehouseDbContext context, IUnitOfWork unitOfWor
                 .Include(receipt => receipt.Items);
         }
 
-        var receipt = await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+        var receipt = await query.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         
         return receipt ?? null;
     }
