@@ -1,4 +1,6 @@
-﻿namespace Warehouse.Application.UseCases.Balances.Dtos;
+﻿using Warehouse.Core;
+
+namespace Warehouse.Application.UseCases.Balances.Dtos;
 
 public sealed record BalanceResponse(
     Guid Id,

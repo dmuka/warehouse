@@ -1,17 +1,23 @@
 ﻿using MediatR;
+using Microsoft.Data.SqlClient;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Balances.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
-using Warehouse.Infrastructure.Data.DTOs;
+using Warehouse.Domain.Aggregates.Balances;
+using Warehouse.Domain.Aggregates.Resources;
+using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Application.UseCases.Balances;
 
 public record GetFilteredBalancesQuery(
-    List<Guid> ResourceNames, 
-    List<Guid> UnitNames) : IRequest<Result<IList<BalanceResponse>>>;
+    List<Guid> ResourceIds, 
+    List<Guid> UnitIds) : IRequest<Result<IList<BalanceResponse>>>;
 
-public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> balanceRepository) 
-    : IRequestHandler<GetFilteredBalancesQuery, Result<IList<BalanceResponse>>>
+public sealed class GetFilteredBalancesQueryHandler(
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<GetFilteredBalancesQuery, Result<IList<BalanceResponse>>>
 {
     public async Task<Result<IList<BalanceResponse>>> Handle(
         GetFilteredBalancesQuery request,
@@ -30,23 +36,44 @@ public sealed class GetFilteredBalancesQueryHandler(IRepository<BalanceDto2> bal
                                inner join Units on Balances.UnitId = Units.Id
                            where Resources.IsActive = 1 and Units.IsActive = 1
                            """;
-
-        if (request.ResourceNames.Count > 0)
+        
+        var parameters = new List<object>();
+        if (request.ResourceIds.Count > 0)
         {
-            var resourcesIds = string.Join(',', request.ResourceNames);
-            sql += $" and Resources.Id in('{resourcesIds}')";
+            var resourceParams = request.ResourceIds.Select((id, index) => 
+            {
+                var paramName = $"@resource{index}";
+                parameters.Add(new SqlParameter(paramName, id));
+                
+                return paramName;
+            }).ToArray();
+
+            sql += $" AND Resources.Id IN ({string.Join(",", resourceParams)})";
         }
 
-        if (request.UnitNames.Count > 0)
+        if (request.UnitIds.Count > 0)
         {
-            var unitsIds = string.Join(',', request.UnitNames);
-            sql += $" and Units.Id in('{unitsIds}')";
+            var unitParams = request.UnitIds.Select((id, index) => 
+            {
+                var paramName = $"@unit{index}";
+                parameters.Add(new SqlParameter(paramName, id));
+                
+                return paramName;
+            }).ToArray();
+
+            sql += $" AND Units.Id IN ({string.Join(",", unitParams)})";
         }
         
-        var dtos = await balanceRepository.GetFromRawSqlAsync(sql, null, cancellationToken: cancellationToken);
-
-        var response = dtos.Select(dto => new BalanceResponse(dto.Id, dto.ResourceId, dto.ResourceName, dto.UnitId, dto.UnitName, dto.Quantity)).ToList();
+        var cacheParams = new List<object>();
+        if (request.ResourceIds.Count > 0) cacheParams.AddRange(request.ResourceIds.Select(id => (object)id));
+        if (request.UnitIds.Count > 0) cacheParams.AddRange(request.UnitIds.Select(id => (object)id));
+        var cacheKey = keyGenerator.ForRawSql<Balance>(sql, cacheParams);
         
-        return Result.Success<IList<BalanceResponse>>(response);
+        var response = await cache.GetOrCreateAsync(
+            cacheKey,
+            async () =>
+                await context.GetFromRawSqlAsync<BalanceResponse>(sql, parameters, cancellationToken: cancellationToken));
+
+        return Result.Success(response);
     }
 }

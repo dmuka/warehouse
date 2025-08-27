@@ -14,10 +14,10 @@ public class BalanceDto : Dto
         UnitId = unitId;
     }
     public Guid ResourceId { get; set; } = Guid.Empty;
+    public string ResourceName { get; set; } = string.Empty;
     public Guid UnitId { get; set; } = Guid.Empty;
+    public string UnitName { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
-    public ResourceDto ResourceDto { get; set; } = null!;
-    public UnitDto UnitDto { get; set; } = null!;
 
     public override Entity ToEntity()
     {

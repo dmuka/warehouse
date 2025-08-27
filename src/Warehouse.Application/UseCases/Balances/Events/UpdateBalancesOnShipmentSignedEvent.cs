@@ -1,55 +1,52 @@
 ﻿using MediatR;
-using Warehouse.Application.UseCases.Balances.Specification;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Balances;
-using Warehouse.Domain.Aggregates.Shipments.DomainEvents;
 using Warehouse.Domain.Aggregates.Resources;
+using Warehouse.Domain.Aggregates.Shipments.DomainEvents;
 using Warehouse.Domain.Aggregates.Units;
 
 namespace Warehouse.Application.UseCases.Balances.Events;
 
-public sealed class UpdateBalancesOnShipmentCreatedHandler(
-    IBalanceRepository balanceRepository,
-    IResourceRepository resourceRepository,
-    IUnitRepository unitRepository,
-    IUnitOfWork unitOfWork)
-    : INotificationHandler<ShipmentSignedDomainEvent>
+public sealed class UpdateBalancesOnShipmentSignedHandler(
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator,
+    ILogger<UpdateBalancesOnShipmentSignedHandler> logger) : INotificationHandler<ShipmentSignedDomainEvent>
 {
     public async Task Handle(
         ShipmentSignedDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-
         try
         {
             foreach (var item in notification.Items)
             {
-                var resourceSpecResult = await new ResourceMustExist(item.ResourceId, resourceRepository)
-                    .IsSatisfiedAsync(cancellationToken);
-                if (resourceSpecResult.IsFailure) throw new ApplicationException(resourceSpecResult.Error.Description);
-
-                var unitSpecResult = await new UnitMustExist(item.UnitId, unitRepository)
-                    .IsSatisfiedAsync(cancellationToken);
-                if (unitSpecResult.IsFailure) throw new ApplicationException(unitSpecResult.Error.Description);
-
-                var balance = await balanceRepository.GetByResourceAndUnitAsync(
-                    new ResourceId(item.ResourceId),
-                    new UnitId(item.UnitId),
-                    cancellationToken);
+                var balance = await context.Balances.FirstOrDefaultAsync(balance =>
+                    balance.ResourceId == item.ResourceId
+                    && balance.UnitId == item.UnitId, cancellationToken);
                 if (balance is null) throw new InvalidOperationException("Balance not found.");
                 
                 var updateResult = balance.Decrease(item.Quantity);
                 if (updateResult.IsFailure) throw new ApplicationException(updateResult.Error.Description);
                 
-                balanceRepository.Update(balance);
+                context.Balances.Update(balance);
+                await context.SaveChangesAsync(cancellationToken);
+                cache.Remove(keyGenerator.ForMethod<Balance>(nameof(GetBalancesQueryHandler)));
+                cache.Remove(keyGenerator.ForEntity<Balance>(item.Id));
+                
+                
+                cache.RemoveAllForEntity<Balance>(balance.Id);
+                cache.Remove(keyGenerator.ForMethod<Balance>(nameof(GetAvailableByResourceAndUnitQueryHandler), 
+                    (nameof(ResourceId), item.ResourceId.Value), 
+                    (nameof(UnitId), item.UnitId.Value)));
             }
-
-            await unitOfWork.CommitAsync(cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync(cancellationToken);
+            logger.LogError(ex, "Failed to update balances for shipment {ShipmentId}", notification.ShipmentId);
             throw;
         }
     }
