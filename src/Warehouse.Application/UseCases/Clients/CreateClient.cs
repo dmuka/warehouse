@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Clients.Dtos;
 using Warehouse.Application.UseCases.Clients.Specifications;
 using Warehouse.Core.Results;
@@ -11,7 +12,9 @@ public record CreateClientCommand(ClientRequest Request) : IRequest<Result<Clien
 
 public sealed class CreateClientCommandHandler(
     IClientRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateClientCommand, Result<ClientId>>
+    IUnitOfWork unitOfWork,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<CreateClientCommand, Result<ClientId>>
 {
     public async Task<Result<ClientId>> Handle(
         CreateClientCommand request,
@@ -28,7 +31,8 @@ public sealed class CreateClientCommandHandler(
         if (clientResult.IsFailure) return Result.Failure<ClientId>(clientResult.Error);
 
         repository.Add(clientResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Client>(nameof(GetClientsQueryHandler)));
 
         return Result.Success(clientResult.Value.Id);
     }

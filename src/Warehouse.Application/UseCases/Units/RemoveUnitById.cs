@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Receipts;
@@ -14,8 +15,9 @@ public record RemoveUnitByIdQuery(Guid Id) : IRequest<Result>;
 public sealed class RemoveUnitByIdQueryHandler(
     IUnitRepository repository,
     IReceiptRepository receiptRepository,
-    IShipmentRepository shipmentRepository, 
-    IUnitOfWork unitOfWork) : IRequestHandler<RemoveUnitByIdQuery, Result>
+    IShipmentRepository shipmentRepository,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<RemoveUnitByIdQuery, Result>
 {
     public async Task<Result> Handle(RemoveUnitByIdQuery request, CancellationToken cancellationToken)
     {
@@ -24,12 +26,14 @@ public sealed class RemoveUnitByIdQueryHandler(
         if (unit is null) return Result.Failure<Unit>(UnitErrors.NotFound(request.Id));
 
         var unitInUse = shipmentRepository.GetQueryable().Any(shipment => shipment.Items.Any(item => item.UnitId == unit.Id));
-        if (!unitInUse) return Result<ResourceId>.ValidationFailure(UnitErrors.UnitIsInUse(request.Id));
+        if (unitInUse) return Result<ResourceId>.ValidationFailure(UnitErrors.UnitIsInUse(request.Id));
         unitInUse = receiptRepository.GetQueryable().Any(receipt => receipt.Items.Any(item => item.UnitId == unit.Id));
-        if (!unitInUse) return Result<ResourceId>.ValidationFailure(UnitErrors.UnitIsInUse(request.Id));
+        if (unitInUse) return Result<ResourceId>.ValidationFailure(UnitErrors.UnitIsInUse(request.Id));
 
         repository.Delete(unit);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Unit>(nameof(GetUnitsQueryHandler)));
+        cache.RemoveAllForEntity<Unit>(unit.Id);
 
         return Result.Success();
     }

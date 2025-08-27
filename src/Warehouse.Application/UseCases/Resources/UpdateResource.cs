@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Resources.Dtos;
 using Warehouse.Application.UseCases.Resources.Specifications;
 using Warehouse.Core.Results;
-using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Resources;
 
 namespace Warehouse.Application.UseCases.Resources;
@@ -11,7 +11,8 @@ public record UpdateResourceCommand(ResourceRequest Dto) : IRequest<Result<Resou
 
 public sealed class UpdateResourceCommandHandler(
     IResourceRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateResourceCommand, Result<ResourceId>>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<UpdateResourceCommand, Result<ResourceId>>
 {
     public async Task<Result<ResourceId>> Handle(
         UpdateResourceCommand request, 
@@ -24,7 +25,8 @@ public sealed class UpdateResourceCommandHandler(
         if (resourceCreationResult.IsFailure) return Result.Failure<ResourceId>(resourceCreationResult.Error);
         
         repository.Update(resourceCreationResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Resource>(nameof(GetResourcesQueryHandler)));
+        cache.Remove(keyGenerator.ForEntity<Resource>(resourceCreationResult.Value.Id));
 
         return Result.Success(resourceCreationResult.Value.Id);
     }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Clients.Dtos;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
@@ -10,7 +11,8 @@ public record UpdateClientCommand(ClientRequest Dto) : IRequest<Result>;
 
 public sealed class UpdateClientCommandHandler(
     IClientRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateClientCommand, Result>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<UpdateClientCommand, Result>
 {
     public async Task<Result> Handle(
         UpdateClientCommand request,
@@ -23,7 +25,9 @@ public sealed class UpdateClientCommandHandler(
         if (updateResult.IsFailure) return Result.Failure(updateResult.Error);
 
         repository.Update(client);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Client>(nameof(GetClientsQueryHandler)));
+        cache.RemoveAllForEntity<Client>(client.Id);
 
         return Result.Success();
     }

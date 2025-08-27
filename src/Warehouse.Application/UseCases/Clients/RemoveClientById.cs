@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
-using Warehouse.Domain.Aggregates.Receipts;
 using Warehouse.Domain.Aggregates.Shipments;
 
 namespace Warehouse.Application.UseCases.Clients;
@@ -12,7 +12,8 @@ public record RemoveClientByIdQuery(Guid Id) : IRequest<Result>;
 public sealed class RemoveClientByIdQueryHandler(
     IClientRepository repository,
     IShipmentRepository shipmentRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RemoveClientByIdQuery, Result>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<RemoveClientByIdQuery, Result>
 {
     public async Task<Result> Handle(RemoveClientByIdQuery request, CancellationToken cancellationToken)
     {
@@ -24,7 +25,9 @@ public sealed class RemoveClientByIdQueryHandler(
         if (!canDelete) return Result.Failure<Client>(ClientErrors.ClientIsInUse(request.Id));
         
         repository.Delete(client);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Client>(nameof(GetClientsQueryHandler)));
+        cache.RemoveAllForEntity<Client>(client.Id);
 
         return Result.Success();
     }

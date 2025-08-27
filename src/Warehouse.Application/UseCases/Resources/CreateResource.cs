@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Resources.Dtos;
 using Warehouse.Application.UseCases.Resources.Specifications;
 using Warehouse.Core.Results;
-using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Resources;
 
 namespace Warehouse.Application.UseCases.Resources;
@@ -11,11 +11,10 @@ public record CreateResourceCommand(ResourceRequest Request) : IRequest<Result<R
 
 public sealed class CreateResourceCommandHandler(
     IResourceRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateResourceCommand, Result<ResourceId>>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<CreateResourceCommand, Result<ResourceId>>
 {
-    public async Task<Result<ResourceId>> Handle(
-        CreateResourceCommand request, 
-        CancellationToken cancellationToken)
+    public async Task<Result<ResourceId>> Handle(CreateResourceCommand request, CancellationToken cancellationToken)
     {
         var specificationResult = await new ResourceNameMustBeUnique(request.Request.ResourceName, repository)
             .IsSatisfiedAsync(cancellationToken);
@@ -25,7 +24,8 @@ public sealed class CreateResourceCommandHandler(
         if (resourceCreationResult.IsFailure) return Result.Failure<ResourceId>(resourceCreationResult.Error);
         
         repository.Add(resourceCreationResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Resource>(nameof(GetResourcesQueryHandler)));
 
         return Result.Success(resourceCreationResult.Value.Id);
     }

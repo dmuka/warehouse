@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Units.Dtos;
 using Warehouse.Application.UseCases.Units.Specifications;
 using Warehouse.Core.Results;
@@ -12,7 +13,8 @@ public record CreateUnit(UnitRequest Dto) : IRequest<Result<UnitId>>;
 
 public sealed class CreateUnitCommandHandler(
     IUnitRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateUnit, Result<UnitId>>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<CreateUnit, Result<UnitId>>
 {
     public async Task<Result<UnitId>> Handle(
         CreateUnit request,
@@ -26,7 +28,8 @@ public sealed class CreateUnitCommandHandler(
         if (unitResult.IsFailure) return Result.Failure<UnitId>(unitResult.Error);
 
         repository.Add(unitResult.Value);
-        await unitOfWork.CommitAsync(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Unit>(nameof(GetUnitsQueryHandler)));
 
         return Result.Success(unitResult.Value.Id);
     }

@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Core.Results;
-using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Clients;
 
 namespace Warehouse.Application.UseCases.Clients;
@@ -9,7 +9,8 @@ public record UnarchiveClientCommand(Guid Id) : IRequest<Result>;
 
 public sealed class UnarchiveClientCommandHandler(
     IClientRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UnarchiveClientCommand, Result>
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<UnarchiveClientCommand, Result>
 {
     public async Task<Result> Handle(UnarchiveClientCommand request, CancellationToken cancellationToken)
     {
@@ -20,7 +21,8 @@ public sealed class UnarchiveClientCommandHandler(
         client.Activate();
 
         repository.Update(client);
-        await unitOfWork.CommitAsync(cancellationToken);
+        cache.Remove(keyGenerator.ForMethod<Client>(nameof(GetClientsQueryHandler)));
+        cache.RemoveAllForEntity<Client>(client.Id);
         
         return Result.Success();
     }
