@@ -60,25 +60,16 @@ public class Shipment : AggregateRoot
             shipmentId is null ? new ShipmentId(Guid.NewGuid()) : new ShipmentId(shipmentId.Value));
     
         if (status == ShipmentStatus.Signed) shipment.ChangeStatus(ShipmentStatus.Signed);
-        
-        shipment.AddDomainEvent(new ShipmentCreatedDomainEvent(
-            shipment.Id,
-            items.Select(i => ShipmentItem.Create(
-                shipment.Id,
-                i.ResourceId.Value,
-                i.UnitId.Value,
-                i.Quantity,
-                i.Id).Value).ToList()));
 
         return shipment;
     }
 
-    public Result<Shipment> Update(
+    public Result Update(
         string number,
         DateTime date,
         Guid clientId,
         IList<ShipmentItem> items,
-        ShipmentStatus status )
+        ShipmentStatus status)
     {
         var validationResults = ValidateShipmentDetails(number);
         if (validationResults.Length != 0)
@@ -105,13 +96,12 @@ public class Shipment : AggregateRoot
         
         if (status != Status) ChangeStatus(status);
 
-        return this;
+        return Result.Success();
     }
     
     public void Remove()
     {
-        if (Status != ShipmentStatus.Draft)
-            AddDomainEvent(new ShipmentRemovedDomainEvent(Id, Items.ToList()));
+        AddDomainEvent(new ShipmentRemovedDomainEvent(Id, Items.ToList()));
     }
 
     public Result AddItem(ResourceId resourceId, UnitId unitId, decimal quantity)
@@ -170,7 +160,6 @@ public class Shipment : AggregateRoot
         }
 
         Status = newStatus;
- 
         
         return Result.Success();
     }

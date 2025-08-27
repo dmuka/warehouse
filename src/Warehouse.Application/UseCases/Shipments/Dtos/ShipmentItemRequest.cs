@@ -1,7 +1,7 @@
 ﻿namespace Warehouse.Application.UseCases.Shipments.Dtos;
 
 public sealed record ShipmentItemRequest(
-    Guid Id,
+    Guid? Id,
     Guid ShipmentId,
     Guid ResourceId,
     string ResourceName,

@@ -1,24 +1,31 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Shipments.Dtos;
 using Warehouse.Core.Results;
+using Warehouse.Domain;
 using Warehouse.Domain.Aggregates.Shipments;
-using Warehouse.Infrastructure.Data;
 
 namespace Warehouse.Application.UseCases.Shipments;
 
 public record GetShipmentByIdQuery(Guid Id) : IRequest<Result<ShipmentResponse>>;
 
-public sealed class GetShipmentByIdQueryHandler(WarehouseDbContext context) 
-    : IRequestHandler<GetShipmentByIdQuery, Result<ShipmentResponse>>
+public sealed class GetShipmentByIdQueryHandler(
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator) : IRequestHandler<GetShipmentByIdQuery, Result<ShipmentResponse>>
 {
     public async Task<Result<ShipmentResponse>> Handle(
         GetShipmentByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var shipment = await context.Shipments
-            .Include(shipment => shipment.Items)
-            .FirstOrDefaultAsync(shipment => shipment.Id == request.Id, cancellationToken);
+        var id = new ShipmentId(request.Id);
+        var cacheKey = keyGenerator.ForEntity<Shipment>(id);
+        
+        var shipment = await cache.GetOrCreateAsync(cacheKey, async () =>
+            await context.Shipments.AsNoTracking()
+                .Include(shipment => shipment.Items)
+                .FirstOrDefaultAsync(shipment => shipment.Id == request.Id, cancellationToken));
         if (shipment is null) return Result.Failure<ShipmentResponse>(ShipmentErrors.NotFound(request.Id));
         
         var response = new ShipmentResponse(

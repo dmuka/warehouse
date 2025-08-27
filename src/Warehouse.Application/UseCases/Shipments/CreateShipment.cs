@@ -1,9 +1,9 @@
 ﻿using MediatR;
+using Warehouse.Application.Abstractions.Cache;
 using Warehouse.Application.UseCases.Shipments.Dtos;
 using Warehouse.Application.UseCases.Shipments.Specifications;
 using Warehouse.Core.Results;
 using Warehouse.Domain;
-using Warehouse.Domain.Aggregates.Clients;
 using Warehouse.Domain.Aggregates.Shipments;
 
 namespace Warehouse.Application.UseCases.Shipments;
@@ -12,6 +12,9 @@ public record CreateShipmentCommand(ShipmentCreateRequest ShipmentRequest) : IRe
 
 public sealed class CreateShipmentCommandHandler(
     IShipmentRepository shipmentRepository,
+    IWarehouseDbContext context,
+    ICacheService cache,
+    ICacheKeyGenerator keyGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateShipmentCommand, Result<ShipmentId>>
 {
     public async Task<Result<ShipmentId>> Handle(
@@ -38,8 +41,9 @@ public sealed class CreateShipmentCommandHandler(
         
         try
         {
-            shipmentRepository.Add(shipmentResult.Value);
+            context.Shipments.Add(shipmentResult.Value);
             await unitOfWork.CommitAsync(cancellationToken);
+            cache.Remove(keyGenerator.ForMethod<Shipment>(nameof(GetShipmentsQueryHandler)));
             
             return Result.Success(shipmentResult.Value.Id);
         }
